@@ -1,0 +1,11 @@
+{
+  "name": "order-fetcher",
+  "version": "0.1.0",
+  "description": "WooCommerce order fetcher",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jared Reisinger",
+  "license": "ISC"
+}
