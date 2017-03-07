@@ -8,6 +8,7 @@ const R = require('ramda');
 const moment = require('moment');
 const chalk = require('chalk');
 const sprintf = require('sprintf-js');
+const entities = require('entities');
 const json2csv = require('json2csv');
 const WooCommerce = require('woocommerce-api');
 // const request = require('request-promise');
@@ -124,17 +125,26 @@ function showOrder(order, index) {
     }
 }
 
+const isPhoneRE = /phone|fax/i;
+const hasPriceRE = / \(\$\d+.\d\d\)$/;
+const excelDateTimeFmt = 'M/D/YYYY h:mm:ss A';
 
 function itemize(order) {
     var simplifiedOrder = R.pick(
         [
-            'id', 'status', 'date_created', 'date_modified',
-            'total', 'billing'
+            'id', 'status', 'total', 'billing',
+            // 'date_created', 'date_modified',
         ],
         order);
 
-    simplifiedOrder.billing.full_name = sprintf.sprintf("%s %s", simplifiedOrder.billing.first_name || '',
-                simplifiedOrder.billing.last_name || '').trim();
+    simplifiedOrder.date_created = moment(order.date_created).format(excelDateTimeFmt);
+
+    simplifiedOrder.total = sprintf.sprintf('$%s', order.total);
+
+    simplifiedOrder.billing.full_name = sprintf.sprintf("%s %s", order.billing.first_name || '',
+                order.billing.last_name || '').trim();
+
+    simplifiedOrder.billing.phone = normalizePhone(order.billing.phone);
 
     var items = [];
     for (var item of order.line_items) {
@@ -146,16 +156,35 @@ function itemize(order) {
         var simplifiedItem = R.pick(
             [
                 'id', 'name', 'sku', 'product_id', 'variation_id',
-                'quantity', 'total'
+                'quantity', 'total',
             ],
             item);
+
+        simplifiedItem.total = sprintf.sprintf('$%s', item.total);
 
         // In order to make the metadata usable, we transform it from a list of
         // objects (that happens to have a 'key' property) to a map using that
         // 'key' property as the key!
         simplifiedItem.meta = {};
         for (const m of item.meta) {
-            simplifiedItem.meta[m.key] = R.omit(['key'], m);
+            var key = entities.decodeHTML(m.key);
+            var label = entities.decodeHTML(m.label);
+            var value = entities.decodeHTML(m.value);
+
+            if (hasPriceRE.test(key)) {
+                debug('key has price: %s', key);
+                key = key.replace(hasPriceRE, '');
+            }
+
+            if (hasPriceRE.test(label)) {
+                debug('label has price: %s', label);
+                label = label.replace(hasPriceRE, '');
+            }
+
+            simplifiedItem.meta[key] = {
+                label: label,
+                value: isPhoneRE.test(label) ? normalizePhone(value) : value,
+            };
         }
 
         // Graft the order onto each item.
@@ -221,6 +250,9 @@ function generateCsv(items) {
     },{
         value: 'quantity',
         label: 'quantity',
+    },{
+        value: 'total',
+        label: 'total',
     // },{
     //     value: '',
     //     label: '',
@@ -233,6 +265,54 @@ function generateCsv(items) {
 
     var csv = json2csv({ data: items, fields: fields });
     return csv;
+}
+
+// do out best to normalize formatting of phone numbers...
+const nonPhoneRe = /[^0-9]/g;
+const noneRe = /^(?:none|n\/?a|no fax|[10()-]+|x+|\s+)$/i;
+
+function normalizePhone(phone) {
+    if (!phone || noneRe.test(phone)) {
+        if (phone) {
+            info('normalizing %s to (none)', phone);
+        }
+        return "(none)";
+    }
+
+    var origPhone = phone;
+
+    var phone = phone.replace(nonPhoneRe, '');
+
+    if (phone.length === 11 && phone[0] === '1') {
+        phone = phone.slice(1);
+    }
+
+    switch (phone.length) {
+        case 10:
+            phone = sprintf.sprintf('(%s) %s-%s', phone.slice(0,3), phone.slice(3,6), phone.slice(6));
+            break;
+        case 7:
+            phone = sprintf.sprintf('%s-%s', phone.slice(0,3), phone.slice(3));
+            break;
+        case 9:
+            // we have a couple of 9-digit numbers where they missed 1 in the
+            // *second* set: '206-12-3456'
+            phone = sprintf.sprintf('(%s) %s?-%s', phone.slice(0,3), phone.slice(3,5), phone.slice(5));
+            info('short phone: %(orig)s, treating as %(phone)s', { orig: origPhone, phone: phone });
+            break;
+        default:
+            if (phone.length >= 11 && phone.length <= 14) {
+                // we have a couple of 11-digit that look like an extra digit...
+                phone = sprintf.sprintf('(%s) %s-%s (+%s)', phone.slice(0,3), phone.slice(3,6), phone.slice(6,10), phone.slice(10));
+                info('long phone: %(orig)s, treating as %(phone)s', { orig: origPhone, phone: phone });
+            } else {
+                info('unexpected phone: %s, leaving as-is', origPhone);
+                phone = origPhone;
+            }
+            break;
+    }
+
+    return phone;
 }
 
 function includeMetaFields(data, item) {

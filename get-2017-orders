@@ -1,8 +1,11 @@
-#!/bin/sh -e
+#!/bin/sh -xe
 
-set COMMON = '--after 2017-01-01'
+YEAR="2017"
+PROG="node ./index.js"
+ARGS="--after ${YEAR}-01-01 --before ${YEAR}-03-31"
+OUTPATH="_output/${YEAR}"
 
-npm start -- ${COMMON} --sku edbooth2017 --out _output/2017-ed-booths.csv
-npm start -- ${COMMON} --sku grooming2017 --out _output/2017-grooming.csv
-npm start -- ${COMMON} --sku 2017parking --out _output/2017-parking.csv
-npm start -- ${COMMON} --sku tour2017 --out _output/2017-tour.csv
+${PROG} ${ARGS} --sku edbooth${YEAR}  --out ${OUTPATH}-ed-booths.csv
+${PROG} ${ARGS} --sku grooming${YEAR} --out ${OUTPATH}-grooming.csv
+${PROG} ${ARGS} --sku ${YEAR}parking  --out ${OUTPATH}-parking.csv
+${PROG} ${ARGS} --sku tour${YEAR}     --out ${OUTPATH}-tour.csv
