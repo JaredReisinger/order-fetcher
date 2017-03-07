@@ -11,7 +11,6 @@ const sprintf = require('sprintf-js');
 const entities = require('entities');
 const json2csv = require('json2csv');
 const WooCommerce = require('woocommerce-api');
-// const request = require('request-promise');
 const linkParser = require('parse-link-header');
 const program = require('commander');
 const pkgInfo = require('./package.json');
@@ -59,7 +58,7 @@ const debugObj = R.compose(debug('%s'), util.inspect);
 
 
 function getAllPages(endpoint) {
-    var items = [];
+    var values = [];
     var pageNum = 1;
 
     return getPageAndLinks(endpoint);
@@ -78,13 +77,13 @@ function getAllPages(endpoint) {
                 }
 
                 var body = JSON.parse(response.body);
-                var origCount = items.length;
-                items = items.concat(body);
-                debug(chalk.yellow('page %(page)d added %(new)d items (was %(orig)d)... now have %(total)d items'), {
+                var origCount = values.length;
+                values = values.concat(body);
+                debug(chalk.yellow('page %(page)d added %(new)d values (was %(orig)d)... now have %(total)d values'), {
                     page: pageNum,
                     orig: origCount,
                     new: body.length,
-                    total: items.length,
+                    total: values.length,
                 });
 
                 // check for pagination...
@@ -102,11 +101,10 @@ function getAllPages(endpoint) {
                     }
                 }
 
-                return items;
+                return values;
             });
     }
 }
-
 
 
 function showOrder(order, index) {
@@ -125,6 +123,18 @@ function showOrder(order, index) {
     }
 }
 
+
+function getOrderNotes(order) {
+    return getAllPages(sprintf.sprintf('orders/%d/notes', order.id))
+        .each(note => { if (note.customer_node) { info('customer note: %j', note); }})
+        // .tap(debugObj)
+        .then(notes => {
+            order.notes = notes;
+            return order;
+        });
+}
+
+
 const isPhoneRE = /phone|fax/i;
 const hasPriceRE = / \(\$\d+.\d\d\)$/;
 const excelDateTimeFmt = 'M/D/YYYY h:mm:ss A';
@@ -132,7 +142,7 @@ const excelDateTimeFmt = 'M/D/YYYY h:mm:ss A';
 function itemize(order) {
     var simplifiedOrder = R.pick(
         [
-            'id', 'status', 'total', 'billing',
+            'id', 'status', 'total', 'billing', 'customer_note',
             // 'date_created', 'date_modified',
         ],
         order);
@@ -253,9 +263,9 @@ function generateCsv(items) {
     },{
         value: 'total',
         label: 'total',
-    // },{
-    //     value: '',
-    //     label: '',
+    },{
+        value: 'order.customer_note',
+        label: 'note',
     }];
 
     // collect meta-fields from all line-items...
@@ -358,6 +368,8 @@ if (program.before) {
 
 getAllPages(orderUrl)
     .tap(d => info('retrieved %d orders...', d.length))
+    // .tap(debugObj)
+    .map(getOrderNotes)
     // .each(showOrder)
     .map(itemize)
     .then(R.flatten)
