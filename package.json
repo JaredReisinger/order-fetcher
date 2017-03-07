@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "description": "WooCommerce order fetcher",
   "main": "index.js",
+  "bin": "./index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./index.js"
+    "start": "node ./index.js",
+    "list-skus": "node ./index.js --list-skus"
   },
   "author": "Jared Reisinger",
   "license": "ISC",
