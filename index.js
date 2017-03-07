@@ -369,7 +369,7 @@ if (program.before) {
 getAllPages(orderUrl)
     .tap(d => info('retrieved %d orders...', d.length))
     // .tap(debugObj)
-    .map(getOrderNotes)
+    // .map(getOrderNotes)
     // .each(showOrder)
     .map(itemize)
     .then(R.flatten)
