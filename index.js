@@ -1,11 +1,14 @@
 'use strict';
 
+const Promise = require('bluebird');
 const util = require('util');
 const url = require('url');
-const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
 const R = require('ramda');
+const moment = require('moment');
 const chalk = require('chalk');
 const sprintf = require('sprintf-js');
+const json2csv = require('json2csv');
 const WooCommerce = require('woocommerce-api');
 // const request = require('request-promise');
 const linkParser = require('parse-link-header');
@@ -14,7 +17,20 @@ const pkgInfo = require('./package.json');
 
 program
     .version(pkgInfo.version)
+    .option('-a, --after <date>', 'include only orders after the date', asMoment)
+    .option('-b, --before <date>', 'include only orders before the date', asMoment)
+    .option('-l, --list-skus', 'just list the availble skus')
+    .option('-s, --sku <sku-name>', 'filter to the specific sku')
+    .option('-o, --out <filename>', 'file to write (CSV format)')
     .parse(process.argv);
+
+function asMoment(val) {
+    var date = moment(val);
+    if (!date.isValid()) {
+        return null;
+    }
+    return date;
+}
 
 var wc = new WooCommerce({
     url: 'http://seattledogshow.org',
@@ -29,7 +45,8 @@ var wc = new WooCommerce({
 // }
 
 const log = R.curry((colorFn, messageFmt, arg) => console.log(colorFn(sprintf.sprintf(messageFmt, arg))));
-const debug = log(chalk.white);
+const nolog = R.curry((colorFn, messageFmt, arg) => { return; });
+const debug = nolog(chalk.white);
 const info = log(chalk.cyan);
 
 function typeofWrapper(obj) { return typeof(obj); }
@@ -109,35 +126,164 @@ function showOrder(order, index) {
 
 
 function itemize(order) {
+    var simplifiedOrder = R.pick(
+        [
+            'id', 'status', 'date_created', 'date_modified',
+            'total', 'billing'
+        ],
+        order);
+
+    simplifiedOrder.billing.full_name = sprintf.sprintf("%s %s", simplifiedOrder.billing.first_name || '',
+                simplifiedOrder.billing.last_name || '').trim();
+
     var items = [];
     for (var item of order.line_items) {
-        item = R.clone(item);
-        item.order = order;
-        items.push(item);
+
+        if (program.sku && item.sku !== program.sku) {
+            continue;
+        }
+
+        var simplifiedItem = R.pick(
+            [
+                'id', 'name', 'sku', 'product_id', 'variation_id',
+                'quantity', 'total'
+            ],
+            item);
+
+        // In order to make the metadata usable, we transform it from a list of
+        // objects (that happens to have a 'key' property) to a map using that
+        // 'key' property as the key!
+        simplifiedItem.meta = {};
+        for (const m of item.meta) {
+            simplifiedItem.meta[m.key] = R.omit(['key'], m);
+        }
+
+        // Graft the order onto each item.
+        simplifiedItem.order = simplifiedOrder;
+
+        items.push(simplifiedItem);
     }
+
     return items;
 }
 
 
 function showItem(item) {
-    // debugObj(item);
+    debugObj(item);
     var order = item.order;
     console.log(sprintf.sprintf(
-        '#%d %s %s, %d %s, %s',
+        '#%d %s, %d %s, %s',
         order.id,
-        order.billing.first_name,
-        order.billing.last_name,
+        order.billing.full_name,
         item.quantity,
         item.name,
         item.total
     ));
 }
 
+function listSkus(items) {
+    info('listing skus...', null);
+    var skus = R.uniq(R.pluck('sku', items));
+    info('skus: %s', skus.join(', '));
+    return skus;
+}
+
+function outputCsv(items) {
+    info('generating csv...', null);
+    return Promise.resolve(items)
+        .then(generateCsv)
+        .then(output);
+}
+
+
+function generateCsv(items) {
+    var fields = [{
+        value: 'order.id',
+        label: 'order#',
+    },{
+        value: 'order.date_created',
+        label: 'date',
+    },{
+        value: 'order.status',
+        label: 'status',
+    },{
+        value: 'order.billing.full_name',
+        label: 'name',
+    },{
+        value: 'order.billing.email',
+        label: 'email',
+    },{
+        value: 'order.billing.phone',
+        label: 'phone',
+    },{
+        value: 'sku',
+        label: 'sku',
+    },{
+        value: 'quantity',
+        label: 'quantity',
+    // },{
+    //     value: '',
+    //     label: '',
+    }];
+
+    // collect meta-fields from all line-items...
+    var meta = R.reduce(includeMetaFields, { keys: {}, fields: [] }, items);
+
+    fields = fields.concat(R.sortBy(R.prop('label'), meta.fields));
+
+    var csv = json2csv({ data: items, fields: fields });
+    return csv;
+}
+
+function includeMetaFields(data, item) {
+    for (const key of R.keys(item.meta)) {
+        if (data.keys[key]) {
+            continue;
+        }
+
+        var field = {
+            value: sprintf.sprintf('meta["%s"].value', key),
+            label: item.meta[key].label,
+        };
+
+        data.keys[key] = field;
+
+        data.fields.push(field);
+    }
+
+    return data;
+}
+
+function output(csv) {
+    if (!program.out) {
+        console.log(csv);
+        return true;
+    }
+
+    return fs.writeFileAsync(program.out, csv);
+}
+
+
 log(chalk.cyan, 'starting...', []);
 
-getAllPages('orders?status=completed&per_page=100')
-    .tap(d => info('complete (%d items)!', d.length))
+var orderUrl = 'orders?status=completed&per_page=100&orderby=date&order=asc';
+
+if (program.after) {
+    orderUrl = sprintf.sprintf('%s&after=%s', orderUrl, program.after.format());
+}
+
+if (program.before) {
+    orderUrl = sprintf.sprintf('%s&before=%s', orderUrl, program.before.format());
+}
+
+getAllPages(orderUrl)
+    .tap(d => info('retrieved %d orders...', d.length))
     // .each(showOrder)
     .map(itemize)
     .then(R.flatten)
-    .each(showItem);
+    .tap(d => info('filtered to %d items...', d.length))
+    .each(debugObj)
+    //.each(showItem)
+    // .then(decideOutput)
+    .then(program.listSkus ? listSkus : outputCsv)
+    .tap(() => info('complete!'));
