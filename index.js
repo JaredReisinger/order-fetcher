@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 const Promise = require('bluebird');
@@ -7,7 +8,7 @@ const fs = Promise.promisifyAll(require('fs'));
 const R = require('ramda');
 const moment = require('moment');
 const chalk = require('chalk');
-const sprintf = require('sprintf-js');
+const sprintf = require('sprintf-js').sprintf;
 const entities = require('entities');
 const json2csv = require('json2csv');
 const WooCommerce = require('woocommerce-api');
@@ -19,9 +20,11 @@ program
     .version(pkgInfo.version)
     .option('-a, --after <date>', 'include only orders after the date', asMoment)
     .option('-b, --before <date>', 'include only orders before the date', asMoment)
+    .option('--status <status>', 'include only orders with the given status [completed]', 'completed')
     .option('-l, --list-skus', 'just list the availble skus')
     .option('-s, --sku <sku-name>', 'filter to the specific sku')
     .option('-o, --out <filename>', 'file to write (CSV format)')
+    .option('-v, --verbose', 'verbose logging output')
     .parse(process.argv);
 
 function asMoment(val) {
@@ -44,9 +47,14 @@ var wc = new WooCommerce({
 //     console.log(colorFn(sprintf.vsprintf(messageFmt, argList)));
 // }
 
-const log = R.curry((colorFn, messageFmt, arg) => console.log(colorFn(sprintf.sprintf(messageFmt, arg))));
+const log = R.curry((colorFn, messageFmt, arg) => console.log(colorFn(sprintf(messageFmt, arg))));
 const nolog = R.curry((colorFn, messageFmt, arg) => { return; });
-const debug = nolog(chalk.white);
+const optlog = R.curry((colorFn, messageFmt, arg) => {
+    if (program.verbose) {
+        console.log(colorFn(sprintf(messageFmt, arg)));
+    }
+});
+const debug = optlog(chalk.white);
 const info = log(chalk.cyan);
 
 function typeofWrapper(obj) { return typeof(obj); }
@@ -73,7 +81,7 @@ function getAllPages(endpoint) {
             // .tap(keys)
             .then(response => {
                 if (response.statusCode !== 200) {
-                    throw new Error(sprintf.sprintf('Unexpected status code: %d', response.statusCode));
+                    throw new Error(sprintf('Unexpected status code: %d', response.statusCode));
                 }
 
                 var body = JSON.parse(response.body);
@@ -94,7 +102,7 @@ function getAllPages(endpoint) {
                     if (links && links.next && links.next.url) {
                         // deconstruct/reconstruct the link... the API can't
                         // use it directly!
-                        var uri = sprintf.sprintf("%s&page=%s", endpoint, links.next.page)
+                        var uri = sprintf("%s&page=%s", endpoint, links.next.page)
 
                         pageNum++;
                         return getPageAndLinks(uri);
@@ -108,7 +116,7 @@ function getAllPages(endpoint) {
 
 
 function showOrder(order, index) {
-    console.log(chalk.white(sprintf.sprintf(
+    console.log(chalk.white(sprintf(
         '#%s %s %s, %d items',
         chalk.gray(order.id.toString()),
         chalk.black(order.billing.first_name),
@@ -116,7 +124,7 @@ function showOrder(order, index) {
         order.line_items.length
     )));
     for (const item of order.line_items) {
-        console.log(chalk.gray(sprintf.sprintf(
+        console.log(chalk.gray(sprintf(
             '  %s',
             util.inspect(item)
         )));
@@ -125,7 +133,7 @@ function showOrder(order, index) {
 
 
 function getOrderNotes(order) {
-    return getAllPages(sprintf.sprintf('orders/%d/notes', order.id))
+    return getAllPages(sprintf('orders/%d/notes', order.id))
         .each(note => { if (note.customer_node) { info('customer note: %j', note); }})
         // .tap(debugObj)
         .then(notes => {
@@ -144,15 +152,28 @@ function itemize(order) {
         [
             'id', 'status', 'total', 'billing', 'customer_note',
             // 'date_created', 'date_modified',
+            'payment_method', 'transaction_id',
         ],
         order);
 
     simplifiedOrder.date_created = moment(order.date_created).format(excelDateTimeFmt);
 
-    simplifiedOrder.total = sprintf.sprintf('$%s', order.total);
+    simplifiedOrder.total = sprintf('$%s', order.total);
 
-    simplifiedOrder.billing.full_name = sprintf.sprintf("%s %s", order.billing.first_name || '',
-                order.billing.last_name || '').trim();
+    const billing = order.billing;
+
+    simplifiedOrder.billing.full_name = sprintf('%s %s', billing.first_name || '',
+                billing.last_name || '').trim();
+
+    const address_parts = [];
+    address_parts.push(billing.address_1);
+    if (billing.address_2) {
+        address_parts.push(billing.address_2);
+    }
+    address_parts.push(billing.city);
+    address_parts.push(sprintf('%s %s', billing.state, billing.postcode));
+
+    simplifiedOrder.billing.address_single = address_parts.join(', ');
 
     simplifiedOrder.billing.phone = normalizePhone(order.billing.phone);
 
@@ -170,7 +191,7 @@ function itemize(order) {
             ],
             item);
 
-        simplifiedItem.total = sprintf.sprintf('$%s', item.total);
+        simplifiedItem.total = sprintf('$%s', item.total);
 
         // In order to make the metadata usable, we transform it from a list of
         // objects (that happens to have a 'key' property) to a map using that
@@ -210,7 +231,7 @@ function itemize(order) {
 function showItem(item) {
     debugObj(item);
     var order = item.order;
-    console.log(sprintf.sprintf(
+    console.log(sprintf(
         '#%d %s, %d %s, %s',
         order.id,
         order.billing.full_name,
@@ -249,8 +270,8 @@ function generateCsv(items) {
         value: 'order.billing.full_name',
         label: 'name',
     },{
-        value: 'order.billing.email',
-        label: 'email',
+        value: 'order.billing.address_single',
+        label: 'address',
     },{
         value: 'order.billing.phone',
         label: 'phone',
@@ -263,6 +284,12 @@ function generateCsv(items) {
     },{
         value: 'total',
         label: 'total',
+    },{
+        value: 'order.payment_method',
+        label: 'method',
+    },{
+        value: 'order.transaction_id',
+        label: 'transID',
     },{
         value: 'order.customer_note',
         label: 'note',
@@ -299,21 +326,21 @@ function normalizePhone(phone) {
 
     switch (phone.length) {
         case 10:
-            phone = sprintf.sprintf('(%s) %s-%s', phone.slice(0,3), phone.slice(3,6), phone.slice(6));
+            phone = sprintf('%s-%s-%s', phone.slice(0,3), phone.slice(3,6), phone.slice(6));
             break;
         case 7:
-            phone = sprintf.sprintf('%s-%s', phone.slice(0,3), phone.slice(3));
+            phone = sprintf('%s-%s', phone.slice(0,3), phone.slice(3));
             break;
         case 9:
             // we have a couple of 9-digit numbers where they missed 1 in the
             // *second* set: '206-12-3456'
-            phone = sprintf.sprintf('(%s) %s?-%s', phone.slice(0,3), phone.slice(3,5), phone.slice(5));
+            phone = sprintf('(%s) %s?-%s', phone.slice(0,3), phone.slice(3,5), phone.slice(5));
             info('short phone: %(orig)s, treating as %(phone)s', { orig: origPhone, phone: phone });
             break;
         default:
             if (phone.length >= 11 && phone.length <= 14) {
                 // we have a couple of 11-digit that look like an extra digit...
-                phone = sprintf.sprintf('(%s) %s-%s (+%s)', phone.slice(0,3), phone.slice(3,6), phone.slice(6,10), phone.slice(10));
+                phone = sprintf('(%s) %s-%s (+%s)', phone.slice(0,3), phone.slice(3,6), phone.slice(6,10), phone.slice(10));
                 info('long phone: %(orig)s, treating as %(phone)s', { orig: origPhone, phone: phone });
             } else {
                 info('unexpected phone: %s, leaving as-is', origPhone);
@@ -332,7 +359,7 @@ function includeMetaFields(data, item) {
         }
 
         var field = {
-            value: sprintf.sprintf('meta["%s"].value', key),
+            value: sprintf('meta["%s"].value', key),
             label: item.meta[key].label,
         };
 
@@ -353,22 +380,30 @@ function output(csv) {
     return fs.writeFileAsync(program.out, csv);
 }
 
+function createUrl() {
+    var orderUrl = 'orders?per_page=100&orderby=date&order=asc';
+
+    if (program.after) {
+        orderUrl = sprintf('%s&after=%s', orderUrl, program.after.format());
+    }
+
+    if (program.before) {
+        orderUrl = sprintf('%s&before=%s', orderUrl, program.before.format());
+    }
+
+    if (program.status) {
+        orderUrl = sprintf('%s&status=%s', orderUrl, program.status);
+    }
+
+    return Promise.resolve(orderUrl);
+}
 
 log(chalk.cyan, 'starting...', []);
-
-var orderUrl = 'orders?status=completed&per_page=100&orderby=date&order=asc';
-
-if (program.after) {
-    orderUrl = sprintf.sprintf('%s&after=%s', orderUrl, program.after.format());
-}
-
-if (program.before) {
-    orderUrl = sprintf.sprintf('%s&before=%s', orderUrl, program.before.format());
-}
-
-getAllPages(orderUrl)
+createUrl()
+    .tap(d => debug('retrieved %d orders...', d.length))
+    .then(getAllPages)
     .tap(d => info('retrieved %d orders...', d.length))
-    // .tap(debugObj)
+    .tap(debugObj)
     // .map(getOrderNotes)
     // .each(showOrder)
     .map(itemize)
