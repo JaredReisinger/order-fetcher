@@ -20,7 +20,8 @@ program
     .version(pkgInfo.version)
     .option('-a, --after <date>', 'include only orders after the date', asMoment)
     .option('-b, --before <date>', 'include only orders before the date', asMoment)
-    .option('--status <status>', 'include only orders with the given status [completed]', 'completed')
+    .option('--list-statuses', 'list the availble statuses')
+    .option('--status <status>', 'include only orders with the given status')
     .option('-l, --list-skus', 'just list the availble skus')
     .option('-s, --sku <sku-name>', 'filter to the specific sku')
     .option('-o, --out <filename>', 'file to write (CSV format)')
@@ -241,11 +242,31 @@ function showItem(item) {
     ));
 }
 
-function listSkus(items) {
-    info('listing skus...', null);
-    var skus = R.uniq(R.pluck('sku', items));
-    info('skus: %s', skus.join(', '));
-    return skus;
+function decideOutput(items) {
+    const metaOnly = program.listSkus || program.listStatuses;
+
+    if (metaOnly) {
+        if (program.listSkus) {
+            listFieldValues(items, 'skus', R.pluck('sku'));
+        }
+        if (program.listStatuses) {
+            listFieldValues(items, 'statuses', R.compose(R.pluck('status'), R.pluck('order')));
+        }
+        return Promise.resolve(true);
+    } else {
+        return outputCsv(items);
+    }
+}
+
+function listFieldValues(items, label, plucker) {
+    debug('listing %s...', label);
+    var values = R.uniq(plucker(items));
+    debug('values: %j', values);
+    info('%(label)s: %(values)s', {
+        label: label,
+        values: values.join(', '),
+    });
+
 }
 
 function outputCsv(items) {
@@ -411,6 +432,6 @@ createUrl()
     .tap(d => info('filtered to %d items...', d.length))
     .each(debugObj)
     //.each(showItem)
-    // .then(decideOutput)
-    .then(program.listSkus ? listSkus : outputCsv)
+    .then(decideOutput)
+    // .then(program.listSkus ? listSkus : outputCsv)
     .tap(() => info('complete!'));
