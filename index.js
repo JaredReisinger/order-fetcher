@@ -291,6 +291,9 @@ function generateCsv(items) {
         value: 'order.billing.full_name',
         label: 'name',
     },{
+        value: 'order.billing.email',
+        label: 'email',
+    },{
         value: 'order.billing.address_single',
         label: 'address',
     },{
