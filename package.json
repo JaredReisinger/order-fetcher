@@ -1,21 +1,29 @@
 {
   "name": "order-fetcher",
   "version": "0.3.0",
+  "author": "Jared Reisinger",
+  "license": "ISC",
   "description": "WooCommerce order fetcher",
-  "bin": "./lib/cli-stub.js",
+  "keywords": [
+    "WooCommerce",
+    "woocommerce",
+    "orders",
+    "csv"
+  ],
+  "homepage": "https://github.com/JaredReisinger/order-fetcher#readme",
+  "repository": "github:JaredReisinger/order-fetcher",
+  "bin": "./lib/order-fetcher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./index.js",
     "list-skus": "node ./index.js --list-skus"
   },
-  "author": "Jared Reisinger",
-  "license": "ISC",
   "dependencies": {
     "chalk": "^2.4.1",
     "commander": "^2.15.1",
     "entities": "^1.1.1",
     "esm": "3.0.34",
-    "json2csv": "^3.11.5",
+    "json2csv": "4.1.2",
     "moment-timezone": "^0.5.17",
     "parse-link-header": "^1.0.1",
     "woocommerce-api": "^1.4.2"
