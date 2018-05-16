@@ -1,6 +1,6 @@
 {
   "name": "order-fetcher",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "WooCommerce order fetcher",
   "bin": "./lib/cli-stub.js",
   "scripts": {
@@ -11,12 +11,12 @@
   "author": "Jared Reisinger",
   "license": "ISC",
   "dependencies": {
-    "@std/esm": "^0.20.0",
-    "chalk": "^2.3.0",
-    "commander": "^2.13.0",
+    "chalk": "^2.4.1",
+    "commander": "^2.15.1",
     "entities": "^1.1.1",
+    "esm": "3.0.34",
     "json2csv": "^3.11.5",
-    "moment-timezone": "^0.5.14",
+    "moment-timezone": "^0.5.17",
     "parse-link-header": "^1.0.1",
     "woocommerce-api": "^1.4.2"
   }
