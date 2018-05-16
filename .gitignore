@@ -1,2 +1,4 @@
-node_modules
-_output
+node_modules/
+_output/
+.nyc_output/
+coverage/

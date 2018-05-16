@@ -4,11 +4,10 @@ node_js:
   - node
   - lts/*
 
-# see https://github.com/codecov/example-node for details...
 install:
   - npm install
-  #- npm install -g codecov
+  - npm install -g codecov
 
-#script:
-#  - istanbul cover ./node_modules/mocha/bin/_mocha --reporter lcovonly -- -R spec
-#  - codecov
+script:
+  - npm run coverage
+  - codecov
