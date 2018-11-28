@@ -14,26 +14,26 @@
   "repository": "github:JaredReisinger/order-fetcher",
   "bin": "./lib/order-fetcher.js",
   "scripts": {
-    "test": "mocha --require esm ./test/**/*.mjs",
+    "test": "mocha --require esm ./test/**/*.js",
     "coverage": "nyc --extension .mjs --all --per-file --reporter lcov --reporter text npm test",
     "start": "node ./index.js",
     "list-skus": "node ./index.js --list-skus"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
-    "commander": "^2.15.1",
-    "entities": "^1.1.1",
-    "esm": "3.0.34",
-    "json2csv": "4.1.2",
-    "moment-timezone": "^0.5.17",
-    "parse-link-header": "^1.0.1",
-    "woocommerce-api": "^1.4.2"
+    "chalk": "2.4.1",
+    "commander": "2.19.0",
+    "entities": "1.1.2",
+    "esm": "3.0.84",
+    "json2csv": "4.3.1",
+    "moment-timezone": "0.5.23",
+    "parse-link-header": "1.0.1",
+    "woocommerce-api": "1.4.2"
   },
   "devDependencies": {
-    "chai": "4.1.2",
-    "codecov": "3.0.2",
-    "mocha": "5.1.1",
-    "nyc": "11.8.0",
-    "sinon": "5.0.7"
+    "chai": "4.2.0",
+    "codecov": "3.1.0",
+    "mocha": "5.2.0",
+    "nyc": "13.1.0",
+    "sinon": "7.1.1"
   }
 }
