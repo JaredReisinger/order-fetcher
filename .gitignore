@@ -2,3 +2,4 @@ node_modules/
 _output/
 .nyc_output/
 coverage/
+public/generated/

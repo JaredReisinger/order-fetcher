@@ -39,7 +39,7 @@ rules:
     - allowAfterThis: true
       allowAfterSuper: true
   no-use-before-define: [error, nofunc]
-  operator-linebreak: [error, after]
+  # operator-linebreak: [error, after]
   promise/prefer-await-to-callbacks: error
   promise/prefer-await-to-then: error
   # sort-keys: error

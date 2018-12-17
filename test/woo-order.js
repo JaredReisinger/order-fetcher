@@ -1,9 +1,9 @@
 import 'chai/register-should';
 // import sinon from 'sinon';
 
-import * as wooOrder from '../lib/woo-order';
+import * as wooOrder from '../lib/wc/WooOrder';
 
-describe('woo-order', () => {
+describe('WooOrder', () => {
   const order = {
     id: '12345',
     status: 'STATUS',
