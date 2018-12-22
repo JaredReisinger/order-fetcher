@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "chalk": "2.4.1",
-    "commander": "2.19.0",
     "esm": "3.0.84",
     "he": "1.2.0",
     "json2csv": "4.3.1",
