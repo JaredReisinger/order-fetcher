@@ -1,7 +1,6 @@
 import 'chai/register-should';
-// import sinon from 'sinon';
-
-import * as wooOrder from '../lib/wc/WooOrder';
+import sinon from 'sinon';
+import WooItem from '../lib/wc/WooItem';
 
 describe('WooOrder', () => {
   const order = {
@@ -24,7 +23,7 @@ describe('WooOrder', () => {
   };
 
   describe('itemize', () => {
-    const result = wooOrder.itemize(order);
+    const result = WooItem.itemize(order);
 
     it('should return an array', () => {
       result.should.be.an('Array');
@@ -33,20 +32,14 @@ describe('WooOrder', () => {
     it('should have an item for each line_item', () => {
       result.should.have.lengthOf(order.line_items.length);
     });
-
-    it('prefix a dollar sign to the total', () => {
-      for (const item of result) {
-        item.total[0].should.equal('$');
-        item.order.total[0].should.equal('$');
-      }
-    });
   });
 
-  describe('itemizeAll', () => {
+  describe('fromOrdersJson', () => {
     it('calls itemize on all of the orders', () => {
-      // wooOrder.itemizeAll([1, 2, 3]);
-      // stub.callCount().should.equal(3);
-      // stub.restore();
+      const itemize = sinon.stub(WooItem, 'itemize');
+      WooItem.fromOrdersJson([1, 2, 3]);
+      itemize.callCount.should.equal(3);
+      itemize.restore();
     });
   });
 });
