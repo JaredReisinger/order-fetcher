@@ -18,6 +18,12 @@ describe('WooOrder', () => {
         id: '234',
         sku: 'SKU_2',
         total: '2.34',
+        meta_data: [
+          { value: 'missing key' },
+          { key: '_ignored', value: 'WooCommerce-style metadata' },
+          { key: 'v1 price $0.99', value: 'v1-style price-included key' },
+          { key: 'phone', value: '8005551212' },
+        ],
       },
     ],
   };
@@ -40,6 +46,14 @@ describe('WooOrder', () => {
       WooItem.fromOrdersJson([1, 2, 3]);
       itemize.callCount.should.equal(3);
       itemize.restore();
+    });
+
+    it('filters sku when given', () => {
+      const itemize = sinon.stub(WooItem, 'itemize').callsFake(i => i);
+      const items = WooItem.fromOrdersJson([1, { sku: 'sku' }, 3], ['sku']);
+      itemize.callCount.should.equal(3);
+      itemize.restore();
+      items.length.should.equal(1);
     });
   });
 });
