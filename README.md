@@ -38,19 +38,29 @@ As of v1.0, `order-fetcher` now also installs as the command `orders`, and uses 
 
 When all else fails, `orders --help` (or `order-fetcher --help`) lists all of the available options.
 
-| Option               | Description                                                         |
-| -------------------- | ------------------------------------------------------------------- |
-| -V, --version        | output the version number                                           |
-| --host _host_        | connect to named host from config file; **required**                |
-| --after _date_       | include only orders after the date                                  |
-| --before _date_      | include only orders before the date                                 |
-| --list-statuses      | list the availble statuses                                          |
-| --status _status_    | include only orders with the given status                           |
-| --list-skus          | just list the availble skus                                         |
-| --sku _sku_          | filter to the specific sku, can be given multiple times (default: ) |
-| -o, --out _filename_ | file to write (CSV format)                                          |
-| -v, --verbose        | increase verbosity of logging output, can be given multiple times   |
-| -h, --help           | output usage information                                            |
+### Top-level commands/options
+
+| command                | description                                                       |
+| ---------------------- | ----------------------------------------------------------------- |
+| `get` _(or host key)_  | retrieves orders from a WooCommerce site                          |
+| `list` _(or host key)_ | summarize skus and/or statuses from a WooCommerce site (TODO!)    |
+| `init` (TBD)           | helps configure order-fetcher the first time                      |
+| `config` (TBD)         | shows configuration information                                   |
+| `-v`, `--verbose`      | increase verbosity of logging output, can be given multiple times |
+| `-h`, `--help`         | output usage information                                          |
+| `--version`            | output the version number                                         |
+
+### Get / Host-key commands/options
+
+| option                   | description                                                         |
+| ------------------------ | ------------------------------------------------------------------- |
+| `list`                   | summarize skus and/or statuses from a WooCommerce site              |
+| `--host` _host_          | WooCommerce host to use _(**only** for `orders get`)_               |
+| `--after` _date_         | include only orders after the date                                  |
+| `--before` _date_        | include only orders before the date                                 |
+| `--status` _status_      | include only orders with the given status                           |
+| `--sku` _sku_            | filter to the specific sku, can be given multiple times (default: ) |
+| `-o`, `--out` _filename_ | file to write (CSV format)                                          |
 
 ### Best Practices
 
@@ -61,13 +71,13 @@ When generating CSV output, the columns come directly from the item information 
 ### Examples
 
 ```sh
-order-fetcher --after 2018-01-01 --status processing --list-skus
+orders host1 --after 2018-01-01 --status processing --list-skus
 ```
 
 Retrieve all orders after 1 January 2018 (inclusive) with a status of "procesing", and list the unique SKUs. This is useful as a precursor to creating per-SKU CSV files.
 
 ```sh
-order-fetcher --after 2018-01-01 --status processing --sku some-sku --out some-sku.csv
+orders host1 --after 2018-01-01 --status processing --sku some-sku --out some-sku.csv
 ```
 
 Retrieve all orders as the previous command, filter the items to the SKU 'some-sku', and write to 'some-sku.csv'.

@@ -36,7 +36,8 @@ rules:
   no-restricted-syntax: [error, ForInStatement, LabeledStatement, WithStatement]
   no-underscore-dangle:
     - error
-    - allowAfterThis: true
+    - allow: [_filename, _missing]
+      allowAfterThis: true
       allowAfterSuper: true
   no-use-before-define: [error, nofunc]
   # operator-linebreak: [error, after]
