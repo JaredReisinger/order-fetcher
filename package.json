@@ -18,7 +18,8 @@
   },
   "scripts": {
     "test": "mocha --require esm ./test/**/*.js",
-    "coverage": "nyc --extension .mjs --all --per-file --reporter lcov --reporter text npm test",
+    "#coverage": "c8 doesn't have --all like nyc, so untested files aren't listed!",
+    "coverage": "c8 --per-file --reporter lcov --reporter text npm test",
     "lint": "eslint --ext js,json,mjs lib test docs",
     "start": "node ./lib/esm-stub.js",
     "list-skus": "node ./lib/esm-stub.js --list-skus"
@@ -40,6 +41,7 @@
     "yargs": "^13.2.4"
   },
   "devDependencies": {
+    "c8": "^5.0.1",
     "chai": "^4.2.0",
     "codecov": "^3.5.0",
     "eslint": "^6.0.1",
@@ -52,7 +54,6 @@
     "eslint-plugin-promise": "^4.2.1",
     "husky": "^3.0.0",
     "mocha": "^6.1.4",
-    "nyc": "^14.1.1",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1",
     "sinon": "^7.3.2"

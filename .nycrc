@@ -1,8 +1,0 @@
-{
-  "all": true,
-  "extension": [".mjs"],
-  "include": ["lib/**"],
-  "#comment": "If the test files aren't excluded, re-runs fail. :(",
-  "exclude": ["**/*.test.mjs"],
-  "reporter": ["lcovonly", "html", "text"]
-}
