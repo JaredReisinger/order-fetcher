@@ -1,0 +1,61 @@
+extends: [airbnb-base, plugin:prettier/recommended]
+
+plugins: [import, json, promise, mocha]
+
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: module
+  ecmaFeatures: {}
+
+settings:
+  import/resolver:
+    node:
+      extensions: [.js, .mjs]
+
+rules:
+  #arrow-body-style: [error, always]
+  # arrow-parens: off
+  # comma-dangle:
+  #   - error
+  #   - arrays: always-multiline
+  #     objects: always-multiline
+  #     imports: always-multiline
+  #     exports: always-multiline
+  #     functions: never
+  import/extensions: [error, always, { js: never, mjs: never }]
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: ['test/**', '**/*.spec.mjs']
+      optionalDependencies: false
+  import/prefer-default-export: [off, never]
+  linebreak-style: off
+  no-console: off
+  no-continue: off
+  no-param-reassign: [error, { props: false }]
+  no-plusplus: off
+  no-restricted-syntax: [error, ForInStatement, LabeledStatement, WithStatement]
+  no-underscore-dangle:
+    - error
+    - allow: [_filename, _missing]
+      allowAfterThis: true
+      allowAfterSuper: true
+  no-use-before-define: [error, nofunc]
+  # operator-linebreak: [error, after]
+  promise/prefer-await-to-callbacks: error
+  promise/prefer-await-to-then: error
+  # sort-keys: error
+  sort-keys: off
+
+env:
+  node: true
+  mocha: true
+
+overrides:
+  - files: ['test/**', '**/*.spec.mjs']
+    rules:
+      # chai has function-less ".exists" and ".true" properties that trigger the
+      # no-unused-expressions rule
+      no-unused-expressions: off
+  - files: ['docs/*-wcv*.js', 'docs/*-wcv*.json']
+    rules:
+      sort-keys: error

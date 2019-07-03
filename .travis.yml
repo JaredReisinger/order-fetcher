@@ -1,13 +1,29 @@
 language: node_js
 
 node_js:
-  - node
   - lts/*
+  - node
 
-install:
-  - npm install
-  - npm install -g codecov
-
+# this is the default script that runs across *all* versions
+#script: npm run test
 script:
-  - npm run coverage
-  - codecov
+  - npm run lint
+  - npm run test
+
+jobs:
+  include:
+    - stage: test
+      node_js: lts/*
+      script: npm run coverage
+      after_success: npm run codecov
+
+    - stage: release
+      node_js: lts/*
+      if: branch = master
+      # overwrite default script?
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npx semantic-release
