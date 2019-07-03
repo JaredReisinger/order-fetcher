@@ -11,7 +11,7 @@ Retrieves WooComerce order information and saves it as a CSV file.
 
 For this tool to be useful at all, you'll need to make sure the [WooCommerce API is enabled, and that you have a key and secret defined](https://docs.woocommerce.com/document/woocommerce-rest-api/). At present, `order-fetcher` only requires read-only access; it has no ability to make changes to the order information on your site.
 
-After installing `order-fetcher` (via `npm install -g order-fetcher`), create a config file at `~/.order-fetcher.json` for all of the WooCommerce sites you have:
+After installing `order-fetcher` (via `npm install -g order-fetcher`), you can run `orders config init` to create your initial configuration file. To do so manually, create a config file at `~/.order-fetcher.json` for all of the WooCommerce sites you have:
 
 ```json
 {
