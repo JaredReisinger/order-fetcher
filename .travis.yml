@@ -25,5 +25,9 @@ jobs:
       node_js: lts/*
       if: branch = master
       # overwrite default script?
-      script:
-        - npx semantic-release
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npx semantic-release
