@@ -17,10 +17,11 @@
     "order-fetcher": "./lib/esm-stub.js"
   },
   "scripts": {
+    "lint": "eslint --ext js,json,mjs lib test docs",
     "test": "mocha --require esm ./test/**/*.js",
     "#coverage": "c8 doesn't have --all like nyc, so untested files aren't listed!",
     "coverage": "c8 --per-file --reporter lcov --reporter text npm test",
-    "lint": "eslint --ext js,json,mjs lib test docs",
+    "codecov": "codecov",
     "start": "node ./lib/esm-stub.js",
     "list-skus": "node ./lib/esm-stub.js --list-skus"
   },
@@ -56,6 +57,7 @@
     "mocha": "^6.1.4",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1",
+    "semantic-release": "^15.13.18",
     "sinon": "^7.3.2"
   },
   "husky": {

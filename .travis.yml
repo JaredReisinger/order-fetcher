@@ -1,13 +1,30 @@
 language: node_js
 
 node_js:
-  - node
   - lts/*
+  - node
 
-install:
-  - npm install
-  - npm install -g codecov
+# install: npm ci
+#   - npm ci
+#   - npm install -g codecov
 
-script:
-  - npm run coverage
-  - codecov
+jobs:
+  include:
+    # defaults to stage: test...
+    - script: npm run lint
+
+    - script: npm run test
+
+    - script: npm run coverage
+      after_success: npm run codecov
+
+    - stage: release
+      node_js: lts/*
+      if: branch = master
+      # overwrite default script?
+      # script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npx semantic-release
