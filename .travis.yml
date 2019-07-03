@@ -21,7 +21,7 @@ jobs:
       node_js: lts/*
       if: branch = master
       # overwrite default script?
-      # script: skip
+      script: skip
       deploy:
         provider: script
         skip_cleanup: true
