@@ -1,5 +1,5 @@
 import 'chai/register-should';
-import * as wcutils from '../lib/wc/wcutils';
+import * as wcutils from '../../lib/wc/wcutils';
 
 describe('wcutils', () => {
   describe('normalizePhone', () => {

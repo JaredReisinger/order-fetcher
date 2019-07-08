@@ -1,5 +1,5 @@
 import 'chai/register-should';
-import WooCurrencies from '../lib/wc/WooCurrencies';
+import WooCurrencies from '../../lib/wc/WooCurrencies';
 
 describe('WooCurrencies', () => {
   const currencies = [

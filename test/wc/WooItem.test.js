@@ -1,6 +1,6 @@
 import 'chai/register-should';
 import sinon from 'sinon';
-import WooItem from '../lib/wc/WooItem';
+import WooItem from '../../lib/wc/WooItem';
 
 describe('WooOrder', () => {
   const order = {

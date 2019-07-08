@@ -18,7 +18,7 @@
   },
   "scripts": {
     "lint": "eslint --ext js,json,mjs lib test docs",
-    "test": "mocha --require esm ./test/**/*.js",
+    "test": "mocha --require esm './test/**/*.js'",
     "#coverage": "c8 doesn't have --all like nyc, so untested files aren't listed!",
     "coverage": "c8 --per-file --reporter lcov --reporter text npm test",
     "codecov": "codecov",
