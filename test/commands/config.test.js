@@ -174,4 +174,38 @@ describe('command - config', async () => {
       prompt.restore();
     });
   });
+
+  describe('hostQuestions()', () => {
+    it('should ask for a name when not provided', () => {
+      const result = Config.hostQuestions();
+      const question = result.find(q => q.name === 'host.name');
+      question.type.should.not.equal('nop');
+    });
+
+    it('should *not* ask for a name when provided', () => {
+      const result = Config.hostQuestions('HOST');
+      const question = result.find(q => q.name === 'host.name');
+      question.type.should.equal('nop');
+    });
+  });
+
+  describe('timezoneQuestions()', () => {
+    it('should ask for a timezone when not provided', () => {
+      const result = Config.timezoneQuestions();
+      const question = result.find(q => q.name === 'timezone');
+      question.type.should.not.equal('nop');
+    });
+
+    it('should *not* ask for a timezone when provided a valid one', () => {
+      const result = Config.timezoneQuestions('UTC');
+      const question = result.find(q => q.name === 'timezone');
+      question.type.should.equal('nop');
+    });
+
+    it('should ask for a timezone when provided an invalid one', () => {
+      const result = Config.timezoneQuestions('BOGUS');
+      const question = result.find(q => q.name === 'timezone');
+      question.type.should.not.equal('nop');
+    });
+  });
 });
