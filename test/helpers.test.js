@@ -31,7 +31,7 @@ describe('helpers', () => {
   describe('asMoment', () => {
     it('should parse a valid date', () => {
       const date = helpers.asMoment('2019-01-01', 'UTC');
-      date.isValid().should.equal(true);
+      date.isValid().should.be.true;
     });
 
     it('should throw on an invalid date', () => {
