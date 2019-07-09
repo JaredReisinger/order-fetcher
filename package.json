@@ -12,6 +12,9 @@
   ],
   "homepage": "https://github.com/JaredReisinger/order-fetcher#readme",
   "repository": "github:JaredReisinger/order-fetcher",
+  "files": [
+    "lib/**"
+  ],
   "bin": {
     "orders": "./lib/esm-stub.js",
     "order-fetcher": "./lib/esm-stub.js"
