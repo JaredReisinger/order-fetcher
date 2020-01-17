@@ -41,7 +41,7 @@
     "printable-characters": "^1.0.42",
     "table": "^5.4.4",
     "woocommerce-api": "^1.4.2",
-    "yargs": "^14.0.0"
+    "yargs": "^15.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.1.0",
