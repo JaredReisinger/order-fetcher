@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.9...v1.0.10) (2020-03-17)
+
+
+### Bug Fixes
+
+* upgrade inquirer from 7.0.4 to 7.0.6 ([32a142f](https://github.com/JaredReisinger/order-fetcher/commit/32a142f1ab346d0c652c95977cf096e15e55ff87))
+
 ## [1.0.9](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.8...v1.0.9) (2020-03-17)
 
 
