@@ -1,3 +1,10 @@
+## [1.0.11](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.10...v1.0.11) (2020-03-17)
+
+
+### Bug Fixes
+
+* **vulnerabilities:** update dependencies ([ade6935](https://github.com/JaredReisinger/order-fetcher/commit/ade6935bf7c455195eb2c91bfd24b7ab8e49cf4e))
+
 ## [1.0.10](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.9...v1.0.10) (2020-03-17)
 
 
