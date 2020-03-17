@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.8...v1.0.9) (2020-03-17)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([06b5ff5](https://github.com/JaredReisinger/order-fetcher/commit/06b5ff5c5b8a6509de84a1c720ea731d320aa967))
+
 ## [1.0.8](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.7...v1.0.8) (2020-01-19)
 
 
