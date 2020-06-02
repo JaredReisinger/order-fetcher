@@ -1,0 +1,16 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - inquirer > lodash:
+        patched: '2020-05-01T03:36:23.337Z'
+    - table > lodash:
+        patched: '2020-05-01T03:36:23.337Z'
+    - inquirer-autocomplete > inquirer > lodash:
+        patched: '2020-05-01T03:36:23.337Z'
+    - woocommerce-api > npm-check-updates > lodash:
+        patched: '2020-05-01T03:36:23.337Z'
+    - woocommerce-api > npm-check-updates > node-alias > lodash:
+        patched: '2020-05-01T03:36:23.337Z'
