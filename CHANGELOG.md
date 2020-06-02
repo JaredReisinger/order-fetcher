@@ -1,3 +1,12 @@
+## [1.0.12](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.11...v1.0.12) (2020-06-02)
+
+
+### Bug Fixes
+
+* package.json, package-lock.json & .snyk to reduce vulnerabilities ([cb4910a](https://github.com/JaredReisinger/order-fetcher/commit/cb4910a6e8a1798875b9b5b197811f6ec3b12f14))
+* package.json, package-lock.json & .snyk to reduce vulnerabilities ([c7723a8](https://github.com/JaredReisinger/order-fetcher/commit/c7723a8339b5f9d62d011e20f87550e1b22da2a0))
+* package.json, package-lock.json & .snyk to reduce vulnerabilities ([bfea29d](https://github.com/JaredReisinger/order-fetcher/commit/bfea29d49c504aa94b3541a8f56f6c6fd05ca0a4))
+
 ## [1.0.11](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.10...v1.0.11) (2020-03-17)
 
 
