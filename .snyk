@@ -14,3 +14,45 @@ patch:
         patched: '2020-05-01T03:36:23.337Z'
     - woocommerce-api > npm-check-updates > node-alias > lodash:
         patched: '2020-05-01T03:36:23.337Z'
+    - '@semantic-release/git > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - eslint > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - eslint-plugin-json > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - semantic-release > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - '@commitlint/cli > @commitlint/load > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > @commitlint/load > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - '@commitlint/config-conventional > conventional-changelog-conventionalcommits > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > commitizen > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - eslint > inquirer > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - eslint > table > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - mocha > yargs-unparser > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - semantic-release > @semantic-release/release-notes-generator > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - semantic-release > @semantic-release/release-notes-generator > conventional-commits-parser > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - '@commitlint/cli > @commitlint/load > @commitlint/resolve-extends > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > @commitlint/load > @commitlint/resolve-extends > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > commitizen > inquirer > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - semantic-release > @semantic-release/release-notes-generator > conventional-changelog-writer > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - '@commitlint/cli > @commitlint/lint > @commitlint/parse > conventional-commits-parser > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - '@commitlint/cli > @commitlint/lint > @commitlint/rules > @commitlint/ensure > lodash':
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > commitizen > cz-conventional-changelog > @commitlint/load > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
+    - cz-conventional-changelog > commitizen > cz-conventional-changelog > @commitlint/load > @commitlint/resolve-extends > lodash:
+        patched: '2020-06-03T03:36:21.763Z'
