@@ -49,7 +49,7 @@ describe('WooOrder', () => {
     });
 
     it('filters sku when given', () => {
-      const itemize = sinon.stub(WooItem, 'itemize').callsFake(i => i);
+      const itemize = sinon.stub(WooItem, 'itemize').callsFake((i) => i);
       const items = WooItem.fromOrdersJson([1, { sku: 'sku' }, 3], ['sku']);
       itemize.callCount.should.equal(3);
       itemize.restore();
