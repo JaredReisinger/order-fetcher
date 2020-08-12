@@ -1,3 +1,16 @@
+## [1.0.13](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.12...v1.0.13) (2020-08-12)
+
+
+### Bug Fixes
+
+* **dependencies:** run `npm audit fix` ([e480164](https://github.com/JaredReisinger/order-fetcher/commit/e480164aa2e4c24db3e9e0fdbe717c853d864a9e))
+* **dependencies:** update all dependencies (including for vulnerabilities) ([501d12b](https://github.com/JaredReisinger/order-fetcher/commit/501d12bd06cc30def5c8e1a6d27baf42081f3251))
+* package.json, package-lock.json & .snyk to reduce vulnerabilities ([a019821](https://github.com/JaredReisinger/order-fetcher/commit/a01982131aa86feff1dd58c8ea42fd17dcb4c68c))
+* upgrade json2csv from 5.0.0 to 5.0.1 ([e29e47b](https://github.com/JaredReisinger/order-fetcher/commit/e29e47b848db28efe0489e88f28d368e97932341))
+* upgrade json2csv from 5.0.0 to 5.0.1 ([0679a1f](https://github.com/JaredReisinger/order-fetcher/commit/0679a1ff510f57f2d4ff7f841c82d2857c9e010e))
+* upgrade moment-timezone from 0.5.28 to 0.5.29 ([93e8d81](https://github.com/JaredReisinger/order-fetcher/commit/93e8d81b9dc82dcc99c5ccac882318d434f372d8))
+* upgrade moment-timezone from 0.5.28 to 0.5.29 ([5b366d3](https://github.com/JaredReisinger/order-fetcher/commit/5b366d3dbedd4e01ec1c446cc51f04986e01bdb9))
+
 ## [1.0.12](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.11...v1.0.12) (2020-06-02)
 
 ### Bug Fixes
