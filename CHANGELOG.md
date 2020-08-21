@@ -1,3 +1,12 @@
+## [1.0.14](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.13...v1.0.14) (2020-08-21)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([8ec6dfe](https://github.com/JaredReisinger/order-fetcher/commit/8ec6dfe1e04c361a89a7f4257f157e80b79afd6b))
+* upgrade eslint from 7.6.0 to 7.7.0 ([05d8ff4](https://github.com/JaredReisinger/order-fetcher/commit/05d8ff4ccc8d48071e7a91322fc4d9e451a3b401))
+* upgrade snyk from 1.373.1 to 1.374.0 ([772be69](https://github.com/JaredReisinger/order-fetcher/commit/772be693e3ab5ce2113b37709c13192d9a3ea3f6))
+
 ## [1.0.13](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.12...v1.0.13) (2020-08-12)
 
 
