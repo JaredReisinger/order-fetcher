@@ -1,3 +1,14 @@
+## [1.0.15](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.14...v1.0.15) (2020-09-04)
+
+
+### Bug Fixes
+
+* upgrade cz-conventional-changelog from 3.2.0 to 3.2.1 ([23edc25](https://github.com/JaredReisinger/order-fetcher/commit/23edc257897fa80d64aa2b4a05db43c04c18be24))
+* upgrade mocha from 8.1.1 to 8.1.2 ([f7ae64e](https://github.com/JaredReisinger/order-fetcher/commit/f7ae64ea12745f0fb73c2b2d76c0cc72c060ad24))
+* upgrade prettier from 2.0.5 to 2.1.0 ([2d936c6](https://github.com/JaredReisinger/order-fetcher/commit/2d936c6d03ca097b355a44ad1df293d00e0ff63f))
+* upgrade pretty-quick from 2.0.1 to 2.0.2 ([1968997](https://github.com/JaredReisinger/order-fetcher/commit/19689976dea1e9897888cbe533a523bd6b588dbb))
+* upgrade snyk from 1.374.0 to 1.381.1 ([b1c6646](https://github.com/JaredReisinger/order-fetcher/commit/b1c66467b6973c93e7f6f69a1f279da8a2302dd4))
+
 ## [1.0.14](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.13...v1.0.14) (2020-08-21)
 
 
