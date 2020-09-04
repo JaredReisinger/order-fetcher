@@ -32,3 +32,7 @@ jobs:
         skip_cleanup: true
         script:
           - npx semantic-release
+
+notifications:
+  slack:
+    secure: FW4x0hex6I3tDyPPr9uQTHIDQA9HXLgIvkgs9LF3fRbXyeA3bJcqU+DNvt7W0+SJ/SsNEGm/8v1CV63Ut7FtGNwF0X6yBzp2aYpz56HPAJuPUw/2e7JCZw6hugF47TkYAyAn33sQFvSUzp85FSJEJhUDPR92HpJ5K4YjtVAOyVGfiAiaHXodJ0cpDmYUVmOT55CIcmpHMM0nJ8LxgOAgCn2flzbzbrLBaPAS72SYAYdKNQcrQAyna+gSVpkkqaDX6Vtm9SBSeslOI8RIargL71FwfA6vgZT1HfHedk/JNuVNz/BKMhMadZ51c5GBbKlisydN/m1KUvd4lIBEd4TnydNLmPUsG8DZnnR4Yexngh4b9NQ6r5FCFiWnFfXvwYJ1c96l1FpHfjM85F9y0kRnyOhRK+iFE9wMwoGXCmx/sEwrrxGmi1xBJrH7SUdRQlFOXFAWWxcIeBZ0ZrYGl4oNYWu22hiNosxH7H2GRVd+YcwcB3lIEpUC5eVn6X8ZQhA/V4buJWs6Xnd2RMv97CbPZzKAeAzS3MeK5EIA9/3X2SLanJCxYycm7tF3ZAOD6+V/FQc1X3F6GvTvF+yo/bwYxfkX/WWpeGQOZPdLWhxSllb/9aY3xfC1gP+izUprRtmUsdKZpIjzbPKFwX+VRebUXARVNce3qi4oH3RzNQVNtG8=
