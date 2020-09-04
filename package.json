@@ -41,7 +41,7 @@
     "moment-timezone": "^0.5.31",
     "parse-link-header": "^1.0.1",
     "printable-characters": "^1.0.42",
-    "snyk": "^1.374.0",
+    "snyk": "^1.381.1",
     "table": "^5.4.6",
     "woocommerce-api": "^1.5.0",
     "yargs": "^15.4.1"
@@ -54,7 +54,7 @@
     "c8": "^7.3.0",
     "chai": "^4.2.0",
     "codecov": "^3.7.2",
-    "cz-conventional-changelog": "^3.2.0",
+    "cz-conventional-changelog": "^3.2.1",
     "eslint": "^7.7.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
@@ -65,8 +65,8 @@
     "eslint-plugin-promise": "^4.2.1",
     "husky": "^4.2.5",
     "mocha": "^8.1.2",
-    "prettier": "^2.0.5",
-    "pretty-quick": "^2.0.1",
+    "prettier": "^2.1.0",
+    "pretty-quick": "^2.0.2",
     "semantic-release": "^17.1.1",
     "sinon": "^9.0.3"
   },
