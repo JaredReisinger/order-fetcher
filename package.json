@@ -54,7 +54,7 @@
     "c8": "^7.3.0",
     "chai": "^4.2.0",
     "codecov": "^3.7.2",
-    "cz-conventional-changelog": "^3.2.1",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.8.1",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
