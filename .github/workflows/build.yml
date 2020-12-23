@@ -7,6 +7,13 @@ on:
     branches: [master]
 
 jobs:
+  forensics:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "forensics"
+      - run: ls -la
+      - run: env | sort
+
   build:
     runs-on: ubuntu-latest
 
@@ -80,6 +87,6 @@ jobs:
         if: always()
         with:
           # can't just use job.status!  This isn't right either...
-          status: ${{ needs.*.result }}
+          status: ${{ contains(needs.*.result, 'failure') }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
