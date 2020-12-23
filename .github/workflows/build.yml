@@ -7,13 +7,6 @@ on:
     branches: [master]
 
 jobs:
-  forensics:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "forensics"
-      - run: ls -la
-      - run: env | sort
-
   build:
     runs-on: ubuntu-latest
 
