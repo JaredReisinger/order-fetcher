@@ -35,9 +35,9 @@ jobs:
 
       - run: npm run build --if-present
 
-      - run: npm lint
-      - run: npm test
-      - run: npm coverage
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run coverage
 
   # we put the coverage, semantic-release, and status into separate jobs so that
   # they *don't* use the matrix strategy and run multiple times
@@ -54,6 +54,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
+
+      - run: ls -la
 
       - run: npm run coverage
       - run: npm run codecov
