@@ -35,7 +35,7 @@
     "he": "^1.2.0",
     "inquirer": "^7.3.3",
     "inquirer-autocomplete": "^0.12.2",
-    "inquirer-autocomplete-prompt": "^1.0.2",
+    "inquirer-autocomplete-prompt": "^1.1.0",
     "json2csv": "^5.0.1",
     "lodash.get": "^4.4.2",
     "moment-timezone": "^0.5.31",
