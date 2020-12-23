@@ -1,0 +1,76 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+defaults:
+  runs-on: ubuntu-latest
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node-version:
+          - 14.x
+          - 15.x
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci
+
+      - run: npm run build --if-present
+
+      - run: npm lint
+      - run: npm test
+      - run: npm coverage
+
+  # we put the coverage, semantic-release, and status into separate jobs so that
+  # they *don't* use the matrix strategy and run multiple times
+
+  release:
+    needs:
+      - build
+    if: ${{ needs.build.result == 'success' && github.event == 'push' }}
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+
+      - run: npm run coverage
+      - run: npm run codecov
+
+      - run: echo "WOULD run semantic-release"
+      #- run: npx semantic-release
+
+  status:
+    if: always()
+    needs:
+      - build
+      - release
+    steps:
+      - name: consolidate results
+        run: echo "all results '${{ needs.*.result }}'"
+
+      - uses: act10ns/slack@v1
+        if: always()
+        with:
+          # can't just use job.status!  This isn't right either...
+          status: ${{ needs.*.result }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
