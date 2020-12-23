@@ -6,11 +6,10 @@ on:
   pull_request:
     branches: [master]
 
-defaults:
-  runs-on: ubuntu-latest
-
 jobs:
   build:
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
         node-version:
@@ -46,7 +45,11 @@ jobs:
   release:
     needs:
       - build
+
     if: ${{ needs.build.result == 'success' && github.event == 'push' }}
+
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/setup-node@v2
         with:
@@ -59,10 +62,14 @@ jobs:
       #- run: npx semantic-release
 
   status:
-    if: always()
     needs:
       - build
       - release
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
     steps:
       - name: consolidate results
         run: echo "all results '${{ needs.*.result }}'"
