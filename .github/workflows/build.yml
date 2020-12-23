@@ -51,9 +51,14 @@ jobs:
 
       - if: ${{ success() && github.event_name == 'push' && matrix.node-version == '14.x'}}
         run: npm run codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - if: ${{ success() && github.event_name == 'push' && matrix.node-version == '14.x'}}
-        run: echo "WOULD run semantic-release"
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: $${{ secrets.NPM_TOKEN }}
 
       - if: always()
         uses: act10ns/slack@v1
@@ -61,35 +66,3 @@ jobs:
           status: ${{ job.status }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  # # we put the coverage, semantic-release, and status into separate jobs so that
-  # # they *don't* use the matrix strategy and run multiple times
-  # release:
-  #   needs:
-  #     - build
-  #   if: ${{ needs.build.result == 'success' && github.event_name == 'push' }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 14.x
-  #     - run: ls -la
-  #     - run: npm run coverage
-  #     - run: npm run codecov
-  #     - run: echo "WOULD run semantic-release"
-  #     #- run: npx semantic-release
-  # status:
-  #   needs:
-  #     - build
-  #     - release
-  #   if: always()
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: consolidate results
-  #       run: echo "all results '${{ needs.*.result }}'"
-  #     - uses: act10ns/slack@v1
-  #       if: always()
-  #       with:
-  #         # can't just use job.status!  This isn't right either...
-  #         status: ${{ contains(needs.*.result, 'failure') }}
-  #       env:
-  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

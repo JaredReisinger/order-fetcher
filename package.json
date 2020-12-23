@@ -24,6 +24,7 @@
     "test": "mocha --require esm './test/**/*.js'",
     "coverage": "c8 --per-file --reporter lcov --reporter text npm test",
     "codecov": "codecov",
+    "release": "semantic-release",
     "start": "node ./lib/esm-stub.js",
     "list-skus": "node ./lib/esm-stub.js --list-skus",
     "snyk-protect": "snyk protect",
