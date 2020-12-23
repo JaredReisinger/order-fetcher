@@ -1,3 +1,15 @@
+## [1.0.16](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.15...v1.0.16) (2020-12-23)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([d531e11](https://github.com/JaredReisinger/order-fetcher/commit/d531e114246b9d03b2b0f5c9907d014d769c7f6a))
+* upgrade cz-conventional-changelog from 3.2.1 to 3.3.0 ([1a03c29](https://github.com/JaredReisinger/order-fetcher/commit/1a03c29e5921d9c6062e5bae2639cbea92940f6e))
+* upgrade eslint from 7.7.0 to 7.8.1 ([2f9f76d](https://github.com/JaredReisinger/order-fetcher/commit/2f9f76d7b2043581bb8143cd391a09aa23debed2))
+* upgrade inquirer-autocomplete-prompt from 1.0.2 to 1.1.0 ([bf157b0](https://github.com/JaredReisinger/order-fetcher/commit/bf157b0b8d5701c474f71ec6f41f07e0424a4560))
+* upgrade prettier from 2.1.0 to 2.1.1 ([58de436](https://github.com/JaredReisinger/order-fetcher/commit/58de43674abbadeae06e0b05917b191a257d9808))
+* upgrade snyk from 1.381.1 to 1.389.0 ([97e0b00](https://github.com/JaredReisinger/order-fetcher/commit/97e0b002b5c2564d9c13a077bad57b3fe7b48ccc))
+
 ## [1.0.15](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.14...v1.0.15) (2020-09-04)
 
 
