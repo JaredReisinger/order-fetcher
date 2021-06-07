@@ -28,7 +28,7 @@
     "start": "node ./lib/esm-stub.js",
     "list-skus": "node ./lib/esm-stub.js --list-skus",
     "snyk-protect": "snyk protect",
-    "prepare": "husky install && npm run snyk-protect"
+    "prepare": "(is-ci || husky install) && npm run snyk-protect"
   },
   "dependencies": {
     "chalk": "^4.1.1",
@@ -65,6 +65,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
     "husky": "^6.0.0",
+    "is-ci": "^3.0.0",
     "mocha": "^8.4.0",
     "prettier": "^2.3.1",
     "pretty-quick": "^3.1.0",
