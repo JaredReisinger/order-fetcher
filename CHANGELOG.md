@@ -1,3 +1,16 @@
+# [2.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.17...v2.0.0) (2021-06-07)
+
+
+### chore
+
+* update all dependencies ([d8665a7](https://github.com/JaredReisinger/order-fetcher/commit/d8665a700d5ff163f545fa7666fb4066220aabe7))
+
+
+### BREAKING CHANGES
+
+* Some dependencies have dropped support for previous versions of node; order-fetcher
+now required Node 12.x or newer (and is tested on Node 14.x).
+
 ## [1.0.17](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.16...v1.0.17) (2020-12-24)
 
 
