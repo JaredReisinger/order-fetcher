@@ -28,7 +28,7 @@
     "start": "node ./lib/esm-stub.js",
     "list-skus": "node ./lib/esm-stub.js --list-skus",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "husky install && npm run snyk-protect"
   },
   "dependencies": {
     "chalk": "^4.1.1",
@@ -70,13 +70,6 @@
     "pretty-quick": "^3.1.0",
     "semantic-release": "^17.4.3",
     "sinon": "^11.1.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged && npm run lint",
-      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "config": {
     "commitizen": {
