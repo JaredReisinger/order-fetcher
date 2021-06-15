@@ -42,7 +42,7 @@
     "moment-timezone": "^0.5.33",
     "parse-link-header": "^1.0.1",
     "printable-characters": "^1.0.42",
-    "snyk": "^1.622.0",
+    "snyk": "^1.630.0",
     "table": "^6.7.1",
     "woocommerce-api": "^1.5.0",
     "yargs": "^17.0.1"
