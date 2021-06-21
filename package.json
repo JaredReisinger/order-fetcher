@@ -34,7 +34,7 @@
     "chalk": "^4.1.1",
     "esm": "^3.2.25",
     "he": "^1.2.0",
-    "inquirer": "^8.1.0",
+    "inquirer": "^8.1.1",
     "inquirer-autocomplete": "^0.12.2",
     "inquirer-autocomplete-prompt": "^1.3.0",
     "json2csv": "^5.0.6",
