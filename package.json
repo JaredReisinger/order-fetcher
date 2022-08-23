@@ -18,8 +18,8 @@
     "!dist/**/*.test.js"
   ],
   "bin": {
-    "orders": "./dist/cli.js",
-    "order-fetcher": "./dist/cli.js"
+    "orders": "./dist/stub.js",
+    "order-fetcher": "./dist/stub.js"
   },
   "scripts": {
     "build": "tsc",
