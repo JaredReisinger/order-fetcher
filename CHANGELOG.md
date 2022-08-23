@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v2.0.0...v3.0.0) (2022-08-23)
+
+
+### Features
+
+* **typescript:** convert to typescript, now ESM only ([5355743](https://github.com/JaredReisinger/order-fetcher/commit/5355743c27d4c4a90e1cc86f860236cef66c7932))
+
+
+### BREAKING CHANGES
+
+* **typescript:** converted to Typescript, output is now ESM
+
 # [2.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v1.0.17...v2.0.0) (2021-06-07)
 
 
