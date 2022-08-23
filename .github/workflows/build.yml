@@ -13,21 +13,21 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - lts
-          - latest
+          - 16
+          - 18
 
     # okay... so it's super helpful to not need to re-acquire/re-build, which
     # means putting *everything* into one job.  We just need to be judicious
     # with 'if' to skip some steps based on matrix stuff...
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -55,13 +55,13 @@ jobs:
 
     steps:
       # sadly, we have to re-do the build... but we can skip lint/test
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: lts
+          node-version: 16
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
