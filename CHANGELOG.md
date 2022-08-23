@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.0...v3.0.1) (2022-08-23)
+
+
+### Bug Fixes
+
+* add CLI stub file to ensure Node is running! :facepalm: ([904129e](https://github.com/JaredReisinger/order-fetcher/commit/904129e834d363a284d80490a9e71be43ec25985))
+
 # [3.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v2.0.0...v3.0.0) (2022-08-23)
 
 
