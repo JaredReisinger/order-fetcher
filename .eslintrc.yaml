@@ -1,16 +1,37 @@
-extends: [airbnb-base, plugin:prettier/recommended]
+root: true
 
-plugins: [import, json, promise, mocha]
+extends:
+  # - airbnb-base
+  # - plugin:prettier/recommended
+  # - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
+
+plugins:
+  # - import
+  # - json
+  # - promise
+  # - mocha
+  - '@typescript-eslint'
+
+parser: '@typescript-eslint/parser'
 
 parserOptions:
   ecmaVersion: 2018
   sourceType: module
   ecmaFeatures: {}
+  tsconfigRootDir: .
+  project:
+    - ./tsconfig.json
 
 settings:
   import/resolver:
     node:
-      extensions: [.js, .mjs]
+      extensions: [.js, .mjs, .ts]
+
+ignorePatterns:
+  - /dist/**
+  - /docs/**
+  - /node_modules/**
 
 rules:
   #arrow-body-style: [error, always]
@@ -22,12 +43,13 @@ rules:
   #     imports: always-multiline
   #     exports: always-multiline
   #     functions: never
-  import/extensions: [error, always, { js: never, mjs: never }]
-  import/no-extraneous-dependencies:
-    - error
-    - devDependencies: ['test/**', '**/*.spec.mjs']
-      optionalDependencies: false
-  import/prefer-default-export: [off, never]
+  # import/extensions: [error, always, { js: never, mjs: never }]
+
+  # import/no-extraneous-dependencies:
+  #   - error
+  #   - devDependencies: ['test/**', '**/*.spec.mjs']
+  #     optionalDependencies: false
+  # import/prefer-default-export: [off, never]
   linebreak-style: off
   no-console: off
   no-continue: off
@@ -41,8 +63,8 @@ rules:
       allowAfterSuper: true
   no-use-before-define: [error, nofunc]
   # operator-linebreak: [error, after]
-  promise/prefer-await-to-callbacks: error
-  promise/prefer-await-to-then: error
+  # promise/prefer-await-to-callbacks: error
+  # promise/prefer-await-to-then: error
   # sort-keys: error
   sort-keys: off
 
@@ -51,11 +73,13 @@ env:
   mocha: true
 
 overrides:
-  - files: ['test/**', '**/*.spec.mjs']
+  - files: ['test/**', '**/*.spec.mjs', '**/*.test.ts']
     rules:
+      '@typescript-eslint/no-empty-function': off
       # chai has function-less ".exists" and ".true" properties that trigger the
       # no-unused-expressions rule
       no-unused-expressions: off
-  - files: ['docs/*-wcv*.js', 'docs/*-wcv*.json']
-    rules:
-      sort-keys: error
+
+  # - files: ['docs/*-wcv*.js', 'docs/*-wcv*.json']
+  # rules:
+  # sort-keys: error

@@ -1,5 +1,5 @@
 import util from 'util';
-import chalk from 'chalk';
+import chalk, { ChalkInstance } from 'chalk';
 import moment from 'moment-timezone';
 
 let verbosity = 0;
@@ -16,13 +16,13 @@ export class UserError extends Error {}
 // util.inspect.styles.special = 'grey';
 // util.inspect.styles.name = 'grey';
 
-export function setVerbosity(v) {
+export function setVerbosity(v?: number) {
   verbosity = v || 0;
   dbg(1, `setting verbosity to ${verbosity}`);
 }
 
 // it's lame that String.compare() doesn't exist!
-export function stringCompare(a, b) {
+export function stringCompare(a: string, b: string) {
   if (a < b) {
     return -1;
   }
@@ -32,21 +32,20 @@ export function stringCompare(a, b) {
   return 0;
 }
 
-export function increment(ignored, total) {
+export function increment(_: string, total: number) {
   // console.error(chalk.white(`incrementing ${total}...`));
   return total + 1;
 }
 
-export function collect(val, memo) {
+export function collect(val: string, memo: string[]) {
   memo.push(val);
   return memo;
 }
 
-export function asMoment(val, timezone) {
+export function asMoment(val: string, timezone: string) {
   const date = moment.tz(
     val,
     moment.ISO_8601,
-    null,
     true,
     timezone || moment.tz.guess()
   );
@@ -56,7 +55,11 @@ export function asMoment(val, timezone) {
   return date;
 }
 
-export function out(msg, chalker, outputter) {
+export function out(
+  msg: string,
+  chalker?: ChalkInstance,
+  outputter?: typeof console.log
+) {
   // eslint-disable-next-line no-param-reassign
   outputter = outputter || console.log.bind(console);
   if (chalker) {
@@ -85,7 +88,7 @@ const objLevels = 2;
 const maxLevels = levelChalkers.length - 1 - objLevels;
 
 // We should *never* just show a bare object, as there's no context!
-export function dbg(level, msg, obj) {
+export function dbg(level: number, msg: string, obj?: unknown) {
   if (verbosity < level) {
     return;
   }
@@ -95,8 +98,9 @@ export function dbg(level, msg, obj) {
 
   if (obj !== undefined) {
     let extra = '';
-    if (obj instanceof Array || obj.length !== undefined) {
-      extra = ` (${obj.length})`;
+    // if (obj instanceof Array || (/*"length" in obj && */obj.length !== undefined)) {
+    if (obj instanceof Object && 'length' in obj) {
+      extra = ` (${obj['length']})`;
     }
     // eslint-disable-next-line no-param-reassign
     msg = `${msg}${extra}:\n${levelChalkers[msgChalkerLevel + objLevels](
@@ -117,9 +121,9 @@ export function dbg(level, msg, obj) {
   out(msg, chalker);
 }
 
-export function err(e, chalker) {
+export function err(e: Error | string, chalker?: ChalkInstance) {
   let msg = e.toString();
-  if (e.message) {
+  if (e instanceof Error && e.message) {
     msg = e.message;
   }
   out(msg, chalker || chalk.red, console.error.bind(console));

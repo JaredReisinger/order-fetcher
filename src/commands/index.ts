@@ -1,7 +1,10 @@
-import Config from './config';
-import Get from './get';
+import Config, { ConfigFile, OptsHandler } from './config.js';
+import Get from './get.js';
 
-export async function createCommands(cfg, handleGlobalOpts) {
+export async function createCommands(
+  cfg: ConfigFile,
+  handleGlobalOpts: OptsHandler
+) {
   const config = new Config(cfg, handleGlobalOpts);
   const get = new Get(cfg, handleGlobalOpts);
 

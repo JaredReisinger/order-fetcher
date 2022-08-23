@@ -3,27 +3,36 @@ import util from 'util';
 import fs from 'fs';
 import chalk from 'chalk';
 
+import yargsFn from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+import { readPackageUp } from 'read-pkg-up';
+
+import * as commands from './commands/index.js';
+import { dbg, err, setVerbosity, UserError } from './helpers.js';
+import { ConfigFile } from './commands/config.js';
 import yargs from 'yargs';
 
-import * as commands from './commands';
-import * as helpers from './helpers';
-
-import pkgInfo from '../package.json';
-
 const readFileAsync = util.promisify(fs.readFile);
+
+interface Args {
+  verbose?: number;
+}
 
 // You can't use 'await' outside of an 'async' function... so you have to use
 // .then()/.catch() at the top level.
 main().catch((e) => {
-  helpers.err(e);
-  if (!(e instanceof helpers.UserError) && e.stack) {
-    helpers.err(e.stack, chalk.white);
+  err(e);
+  if (!(e instanceof UserError) && e.stack) {
+    err(e.stack, chalk.white);
   }
   process.exit(1);
 });
 
 async function main() {
   const cfg = await loadConfig();
+
+  const yargs = yargsFn(hideBin(process.argv)) as yargs.Argv<Args>;
 
   // options used in common for most commands...
   yargs
@@ -37,8 +46,10 @@ async function main() {
     .group(['help', 'version', 'verbose'], 'Global Options');
 
   const cmds = await commands.createCommands(cfg, handleGlobalOpts);
-  helpers.dbg(5, 'commands', { cmds });
-  cmds.forEach((cmd) => yargs.command(cmd));
+  dbg(5, 'commands', { cmds });
+  // NOTE: the Typescript casting here is gross... not sure how to tell yargs
+  // about arguments that come from sub-commands, and when that's okay, etc.
+  cmds.forEach((cmd) => yargs.command(cmd as yargs.CommandModule<Args, Args>));
 
   if (process.stdout.isTTY) {
     // We could allow arbitrarily wide help output, but it looks pretty bad
@@ -48,21 +59,25 @@ async function main() {
 
   await yargs
     .strict()
-    .fail((msg, err) => {
-      helpers.err(msg || err);
-      if (err && !(err instanceof helpers.UserError) && err.stack) {
-        helpers.err(err.stack, chalk.white);
+    .fail((msg, errObj) => {
+      err(msg || errObj);
+      if (errObj && !(errObj instanceof UserError) && errObj.stack) {
+        err(errObj.stack, chalk.white);
       }
       process.exit(1);
     })
     .parse();
 }
 
-async function loadConfig() {
-  const filename = path.join(process.env.HOME, `.${pkgInfo.name}.json`);
+async function loadConfig(): Promise<ConfigFile> {
+  const pkgInfo = await readPackageUp();
+  const filename = path.join(
+    process.env.HOME ?? '.',
+    `.${pkgInfo?.packageJson.name}.json`
+  );
   try {
     const data = await readFileAsync(filename);
-    const cfg = JSON.parse(data);
+    const cfg = JSON.parse(data.toString());
     cfg._filename = filename;
     return cfg;
   } catch (e) {
@@ -77,7 +92,8 @@ async function loadConfig() {
   }
 }
 
-function handleGlobalOpts(argv) {
-  helpers.dbg(2, 'handle global opts', argv);
-  helpers.setVerbosity(argv.verbose);
+function handleGlobalOpts(argv: unknown) {
+  dbg(2, 'handle global opts', argv);
+  if (argv instanceof Object && 'verbose' in argv)
+    setVerbosity(argv['verbose']);
 }

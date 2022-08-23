@@ -1,10 +1,31 @@
 import moment from 'moment-timezone';
 
-import * as wcutils from './wcutils';
-import * as helpers from '../helpers';
+import type { Billing, Order } from 'woocommerce-api';
+
+import * as wcutils from './wcutils.js';
+import { dbg } from '../helpers.js';
+
+export interface SimplifiedBilling {
+  name: string;
+  email: string;
+  address: string;
+  phone: string;
+}
 
 export default class WooOrder {
-  constructor(wcOrder) {
+  id: Order['id'];
+  number: Order['number'];
+  status: Order['status'];
+  currency: Order['currency'];
+  note: Order['customer_note'];
+  paymentMethod: Order['payment_method'];
+  transactionId: Order['transaction_id'];
+  total: Order['total'];
+  fees?: string;
+  billing: SimplifiedBilling;
+  date: moment.Moment;
+
+  constructor(wcOrder: Order) {
     this.id = wcOrder.id;
     this.number = wcOrder.number;
     this.status = wcOrder.status;
@@ -24,10 +45,10 @@ export default class WooOrder {
     // this.date_created = moment.utc(wcOrder.date_created_gmt);
     this.date = moment.utc(wcOrder.date_created_gmt);
 
-    helpers.dbg(1, 'WooOrder', this);
+    dbg(1, 'WooOrder', this);
   }
 
-  static simplifyBilling(wcBilling) {
+  static simplifyBilling(wcBilling: Billing): SimplifiedBilling {
     // eslint-disable-next-line camelcase
     const name = `${wcBilling.first_name || ''} ${
       wcBilling.last_name || ''
@@ -55,10 +76,10 @@ export default class WooOrder {
     };
   }
 
-  static getPaypalFees(wcOrder) {
+  static getPaypalFees(wcOrder: Order) {
     for (const m of wcOrder.meta_data || []) {
       if (m.key === 'PayPal Transaction Fee') {
-        return m.value;
+        return m.value as string;
       }
     }
 

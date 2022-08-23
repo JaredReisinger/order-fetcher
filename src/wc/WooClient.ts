@@ -3,11 +3,27 @@ import WooCommerce from 'woocommerce-api';
 import linkParser from 'parse-link-header';
 
 // import chalk from 'chalk';
-import * as helpers from '../helpers';
+import { dbg } from '../helpers.js';
+
+// // This type may depend on the call, and thus need to be passed in?
+// export interface Data {
+//   // really, we need the "key" prop to be a string... there's a way to type that
+//   // but it gets more complicated...in getAll:
+//   // getAll<T, K extends keyof T>
+//   // maybe a way to extract the viable props?  I've done this before...
+
+//   [index: string]: string;
+// };
+
+type KeyProps<T> = keyof {
+  [P in keyof T as T[P] extends PropertyKey ? P : never]: T[P];
+};
 
 // WooClient wraps the WooCommerce-API helper because it has some rough edges.
 export default class WooClient {
-  constructor(urlStr, key, secret) {
+  _client: WooCommerce;
+
+  constructor(urlStr: string, key: string, secret: string) {
     this._client = new WooCommerce({
       wpAPI: true,
       version: 'wc/v3', // v2 has an issue with the item metadata!
@@ -20,9 +36,13 @@ export default class WooClient {
   // getAll() calls the endpoint as many times as needed to retrieve all of
   // the data, using the 'Link' header to fetch the 'next' page until there
   // are no more!  The 'params' argument should be a simple object.
-  async getAll(endpoint, params, keyName) {
-    const keys = {};
-    const data = [];
+  async getAll<T, K extends KeyProps<T> = KeyProps<T>>(
+    endpoint: string,
+    params: string | Record<string, string> | url.URLSearchParams | undefined,
+    keyName: K
+  ) {
+    const keys: Record<PropertyKey, boolean> = {};
+    const data: T[] = [];
     let page = 1;
     let fetchPage = true;
 
@@ -32,15 +52,15 @@ export default class WooClient {
     while (fetchPage) {
       fetchPage = false; // until proven otherwise
       const uri = `${endpoint}?${params.toString()}`;
-      helpers.dbg(3, `fetching page ${page}...`, { endpoint, params, uri });
+      dbg(3, `fetching page ${page}...`, { endpoint, params, uri });
 
-      // eslint-disable-next-line no-await-in-loop
       const response = await this._client.getAsync(uri);
 
-      helpers.dbg(4, 'raw body', response.body);
-      const body = JSON.parse(response.body);
-      helpers.dbg(4, 'parsed body', body);
-      if (body.code) {
+      dbg(4, 'raw body', response.body);
+      // We need to pass the body type in?
+      const body = JSON.parse(response.body) as T[] | { code: unknown };
+      dbg(4, 'parsed body', body);
+      if ('code' in body) {
         throw body;
       }
 
@@ -49,9 +69,10 @@ export default class WooClient {
       // on consecutive pages.  To de-dupe, we keep a map of the keys/IDs we've
       // seen.
       let duplicates = 0;
-      // eslint-disable-next-line no-loop-func
       body.forEach((d) => {
-        const key = d[keyName];
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore -- thinks keyName can't index the data
+        const key = d[keyName] as PropertyKey;
         if (keys[key]) {
           duplicates++;
           return;
@@ -61,7 +82,7 @@ export default class WooClient {
         data.push(d);
       });
       // data = data.concat(body);
-      helpers.dbg(
+      dbg(
         1,
         `got page ${page}, ${body.length} ${endpoint} (${duplicates} duplicates), now have ${data.length} ${endpoint}`
       );
@@ -75,7 +96,7 @@ export default class WooClient {
       }
     }
 
-    helpers.dbg(3, 'data', data);
+    dbg(3, 'data', data);
     return data;
   }
 }
@@ -85,7 +106,7 @@ export default class WooClient {
 // we need to use *only* the non-oauth params and re-create the URL from
 // scratch.  Fortunately, linkParser reutrns the querystring parameters in
 // additional to the raw url.
-function paramsFromLink(link) {
+function paramsFromLink(link: Record<string, string>) {
   const params = new url.URLSearchParams();
 
   for (const key of Object.keys(link)) {
@@ -94,7 +115,7 @@ function paramsFromLink(link) {
     }
   }
 
-  helpers.dbg(2, 'params from link', { link, params });
+  dbg(2, 'params from link', { link, params });
 
   return params;
 }

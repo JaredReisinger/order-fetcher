@@ -1,31 +1,69 @@
 import util from 'util';
 import fs from 'fs';
 
+import yargs from 'yargs';
 import moment from 'moment-timezone';
 // import chalk from 'chalk';
+// import chalkTemplate from 'chalk-template';
 import json2csv from 'json2csv';
 import lodashGet from 'lodash.get';
 // import * as printable from 'printable-characters';
-import table from 'table';
+import table, { ColumnUserConfig } from 'table';
 
-import * as helpers from '../helpers';
-import WooClient from '../wc/WooClient';
-import WooCurrencies from '../wc/WooCurrencies';
-import WooItem from '../wc/WooItem';
+import { Order, Currency } from 'woocommerce-api';
+
+import * as helpers from '../helpers.js';
+import WooClient from '../wc/WooClient.js';
+import WooCurrencies from '../wc/WooCurrencies.js';
+import WooItem from '../wc/WooItem.js';
+
+import { ConfigFile, OptsHandler } from './config.js';
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
 const whitespaceRE = /\s/g;
 const excelDateTimeFmt = 'M/D/YYYY h:mm:ss A';
 
+// table defines configs as readonly, but we build them piece by piece
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+type AugmentedFieldInfo<T> = Omit<json2csv.FieldInfo<T>, 'label'> & {
+  label: string; // always!
+  config?: table.ColumnUserConfig;
+};
+
+interface Args {
+  host?: string;
+  // zone?: string;
+  after?: moment.Moment;
+  before?: moment.Moment;
+  status?:
+    | 'any'
+    | 'pending'
+    | 'processing'
+    | 'on-hold'
+    | 'completed'
+    | 'cancelled'
+    | 'refunded'
+    | 'failed'
+    | 'trash';
+  sku?: string[];
+  skuPrefix?: string[];
+  out?: string;
+}
+
 export default class Get {
-  constructor(cfg, handleGlobalOpts) {
+  hosts: ConfigFile['hosts'];
+  timezone: string;
+  handleGlobalOpts: OptsHandler;
+
+  constructor(cfg: ConfigFile, handleGlobalOpts: OptsHandler) {
     this.hosts = cfg.hosts;
     this.timezone = cfg.timezone || moment.tz.guess();
     this.handleGlobalOpts = handleGlobalOpts;
   }
 
-  async createCommands() {
+  async createCommands(): Promise<yargs.CommandModule<Args, Args>[]> {
     // create the base 'get' command, and also a per-host version that makes
     // the command-line easier for the user.
     const cmds = Object.keys(this.hosts).map((host) =>
@@ -56,14 +94,15 @@ export default class Get {
   //              function accepting and returning a yargs instance
   //
   //   handler:   a function which will be passed the parsed argv.
-  async createCommand(host) {
+  async createCommand(host?: string): Promise<yargs.CommandModule<Args, Args>> {
     const command = host || 'get';
     // const aliases = '*'; // this is the default command
     const aliases = undefined;
     const describe = `gets orders from ${
       host ? `the ${host}` : 'a'
     } WooCommerce site`;
-    const builder = (yargs) => {
+
+    const builder: yargs.CommandBuilder<Args, Args> = (yargs) => {
       if (!host) {
         yargs.option('host', {
           describe: 'Connect to the given host',
@@ -74,11 +113,11 @@ export default class Get {
       yargs
         .option('after', {
           describe: 'Include only orders after the given date (inclusive)',
-          coerce: (val) => helpers.asMoment(val, this.timezone),
+          coerce: (val: string) => helpers.asMoment(val, this.timezone),
         })
         .option('before', {
           describe: 'Include only orders before the given date (inclusive?)',
-          coerce: (val) => helpers.asMoment(val, this.timezone),
+          coerce: (val: string) => helpers.asMoment(val, this.timezone),
         })
         .option('status', {
           describe: 'Include only orders with the given status',
@@ -97,6 +136,11 @@ export default class Get {
         })
         .option('sku', {
           describe: 'Filter to the specific sku, can be given multiple times',
+          array: true,
+        })
+        .option('sku-prefix', {
+          describe:
+            'Filter to the specific sku prefix, can be given multiple times',
           array: true,
         })
         .option('out', {
@@ -120,6 +164,8 @@ Examples:
 
   Retrieve all orders as the previous command, filter the items to the SKU 'some-sku', and write to 'some-sku.csv'.`
         );
+
+      return yargs;
     };
 
     const handler = this.run.bind(this, host);
@@ -134,7 +180,7 @@ Examples:
   }
 
   //         if (hosts.length !== 0) {
-  //           console.log(chalk`{red Creating the config file:
+  //           console.log(chalkTemplate`{red Creating the config file:
   //
   //   You do not appear to have any hosts listed in a {cyan ~/.${pkgInfo.name}.json}
   //   file.  Please see:
@@ -147,8 +193,11 @@ Examples:
   //       .action(this.run);
   //   }
 
-  // eslint-disable-next-line no-unused-vars
-  async run(seededHost, argv) {
+  async run(
+    seededHost: string | undefined,
+    argv: yargs.ArgumentsCamelCase<Args>,
+    clientOverride?: WooClient
+  ) {
     // REVIEW: if we make a base class for the command, the wrapper and calling
     // the common handler could be moved there!
     this.handleGlobalOpts(argv);
@@ -158,28 +207,46 @@ Examples:
     helpers.dbg(3, 'this', this);
     helpers.dbg(3, 'seededHost', seededHost || '(none)');
 
-    const host = this.hosts[seededHost || argv.host];
+    const host = this.hosts[seededHost || argv.host || ''];
 
     if (!host) {
-      throw new helpers.UserError(`host "${argv.host}" not recognized`);
+      throw new helpers.UserError(
+        `host "${seededHost || argv.host}" not recognized`
+      );
     }
 
-    const client = new WooClient(host.url, host.key, host.secret);
+    const client =
+      clientOverride ?? new WooClient(host.url, host.key, host.secret);
 
     // Get orders/items and the currencies in parallel.  We could delay awaiting
     // on the currencies until just before generating the CSV, but the code is a
     // bit cleaner to await them both at the same time (we don't have to track a
     // pending promise) and it's unlikely to make a huge performance difference.
     const [wcOrders, wcCurrencies] = await Promise.all([
-      client.getAll('orders', createParams(argv), 'id'),
-      client.getAll('data/currencies', undefined, 'code'),
+      // We *could* get all products to filter by skus/categories that way..
+      client.getAll<Order>('orders', createParams(argv), 'id'),
+      client.getAll<Currency>('data/currencies', undefined, 'code'),
     ]);
 
     helpers.dbg(1, `retrieved ${wcOrders.length} orders...`);
     helpers.dbg(3, 'wcOrders', wcOrders);
 
     const currencies = new WooCurrencies(wcCurrencies);
-    const items = WooItem.fromOrdersJson(wcOrders, argv.sku);
+    let items = WooItem.fromOrdersJson(wcOrders /*, argv.sku*/);
+
+    if (argv.sku) {
+      const skus = argv.sku;
+      items = items.filter((i) => skus.includes(i.sku));
+      helpers.out(`found ${items.length} ${skus.join(',')} items...`);
+      helpers.dbg(2, 'filtered items (sku)', items);
+    }
+
+    if (argv.skuPrefix) {
+      const prefixes = argv.skuPrefix;
+      items = items.filter((i) => prefixes.some((p) => i.sku.startsWith(p)));
+      helpers.out(`found ${items.length} ${prefixes.join(',')} items...`);
+      helpers.dbg(2, 'filtered items (sku prefix)', items);
+    }
 
     // const metaOnly = this.opts.listSkus || this.opts.listStatuses;
     //
@@ -204,13 +271,14 @@ Examples:
     }
   }
 
-  generateCsv(items, currencies) {
+  generateCsv(items: WooItem[], currencies: WooCurrencies) {
     const fields = this.defineFields(items, currencies);
     const csv = json2csv.parse(items, { fields });
     return csv;
   }
 
-  generatePretty(items, currencies) {
+  generatePretty(items: WooItem[], currencies: WooCurrencies) {
+    helpers.dbg(1, 'found items...', items);
     const ignoredFields = ['address', 'phone', 'method', 'transID'];
     const fields = this.defineFields(items, currencies).filter(
       (f) =>
@@ -227,15 +295,14 @@ Examples:
     // tweak the date formatter... We could do really smart stuff and determine
     // that *if* we know we'll be wrapping, use a 2-line date format and make
     // the date column smaller than the calcuated "min" width.
-    helpers.dbg(0, 'fields', fields);
-    fields[1].value = (item) => {
+    fields[1].value = (item: WooItem) => {
       const date = moment(item.order.date)
         .tz(this.timezone)
         .format('YYYY-MM-DD');
 
       const time = moment(item.order.date).tz(this.timezone).format('hh:mm a');
 
-      // return chalk`${date} {gray ${time}}`;
+      // return chalkTemplate`${date} {gray ${time}}`;
       return `${date} ${time}`;
     };
 
@@ -250,11 +317,11 @@ Examples:
     // for an example.)
     const defaultWidth = process.stdout.isTTY
       ? Math.floor(process.stdout.columns / fields.length) - 2
-      : undefined;
+      : 80;
 
     // very temporary better-than-nothing width calcs...
     const columns = fields.map((f) => {
-      const config = {};
+      const config: Writeable<ColumnUserConfig> = {};
       if (process.stdout.isTTY) {
         // prettier-ignore
         switch (f.label) {
@@ -298,16 +365,15 @@ Examples:
     });
   }
 
-  getValue(item, field) {
+  getValue(item: WooItem, field: AugmentedFieldInfo<WooItem>) {
     return this.sanitizeString(
       typeof field.value === 'function'
-        ? field.value(item) || ''
+        ? field.value(item, field as json2csv.FieldValueCallbackInfo) || ''
         : lodashGet(item, field.value, '')
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  sanitizeString(val) {
+  sanitizeString(val: string) {
     return (
       (val.toString() || '')
         // .replace(printable.ansiEscapeCodes, '')
@@ -315,30 +381,35 @@ Examples:
     );
   }
 
-  defineFields(items, currencies) {
+  defineFields(items: WooItem[], currencies: WooCurrencies) {
     // We always wants these fields first... each item is either used as both a
     // key and label, or is a [label, key] pair (or [label, key, config]).
     const fieldLabelKeys = [
       ['order#', 'order.id'],
-      ['date', (item) => this.formatDate(item.order.date), { wrapWord: true }],
+      [
+        'date',
+        (item: WooItem) => this.formatDate(item.order.date),
+        { wrapWord: true },
+      ],
       ['status', 'order.status'],
       ['name', 'order.billing.name', { wrapWord: true }],
       ['email', 'order.billing.email'],
       ['address', 'order.billing.address', { wrapWord: true }],
       ['phone', 'order.billing.phone', { wrapWord: true }],
+      // ['product', 'product_id'],
       ['sku', 'sku', { wrapWord: true }],
       ['item', 'name', { wrapWord: true }],
       ['qty', 'quantity', { alignment: 'right' }],
       [
         'total',
-        (item) =>
+        (item: WooItem) =>
           this.formatAmount(item.total, item.order.currency, currencies),
         { alignment: 'right' },
       ],
-      ['line', (item) => item.order_line + 1],
+      ['line', (item: WooItem) => item.order_line + 1],
       [
         'fees',
-        (item) =>
+        (item: WooItem) =>
           item.fees &&
           this.formatAmount(item.fees, item.order.currency, currencies),
         { alignment: 'right' },
@@ -346,13 +417,11 @@ Examples:
       ['method', 'order.paymentMethod'],
       ['transID', 'order.transactionId'],
       ['note', 'order.note', { wrapWord: true }],
-    ];
+    ] as const;
 
     // map to { value: lookup-key, label: display-label } for csv
-    const defaultFields = fieldLabelKeys.map((lk) =>
-      Array.isArray(lk)
-        ? { value: lk[1], label: lk[0], config: lk[2] || {} }
-        : { value: lk, label: lk }
+    const defaultFields = fieldLabelKeys.map<AugmentedFieldInfo<WooItem>>(
+      (lk) => ({ value: lk[1], label: lk[0], config: lk[2] || {} })
     );
 
     helpers.dbg(4, 'default fields', defaultFields);
@@ -360,18 +429,18 @@ Examples:
     // Then we want to add whatever meta fields exist on the items...
     const metaFields = this.collectMetaFields(items);
 
-    return [].concat(defaultFields, metaFields);
+    return defaultFields.concat(metaFields);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  collectMetaFields(items) {
+  collectMetaFields(items: WooItem[]) {
     // While wc/v1 included separate label/key information in the line item
     // metadata, v2 and v3 have only the key.  For add-on properties, it is a
     // good displayable value; variation attributes, however, return the
     // attribute/variation *slug* as the key.  There's not much we can do about
     // this.  (In theory, we could introspect the product, but we don't want
     // that much detailed knowledge in this tool!)
-    const slugs = new Set([].concat(...items.map((i) => Object.keys(i.meta))));
+    const slugs = new Set(items.flatMap((i) => Object.keys(i.meta)));
     helpers.dbg(3, 'meta slugs', slugs);
     const metaFields = [...slugs].map((s) => ({
       // value: `meta["${s}"].value`,
@@ -385,21 +454,21 @@ Examples:
     return metaFields;
   }
 
-  formatDate(d) {
+  formatDate(d: moment.MomentInput) {
     return moment(d).tz(this.timezone).format(excelDateTimeFmt);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  formatAmount(amt, code, currencies) {
+  formatAmount(amt: string, code: string, currencies: WooCurrencies) {
     return `${currencies.getSymbol(code)}${amt}`;
   }
 }
 
 // REVIEW: should this move to WooClient?
-function createParams(opts) {
-  const params = {
-    per_page: 100,
-    // per_page: 10,
+function createParams(opts: yargs.ArgumentsCamelCase<Args>) {
+  const params: Record<string, string> = {
+    per_page: '100',
+    // per_page: '10',
     orderby: 'date',
     order: 'asc',
   };

@@ -1,4 +1,6 @@
 node_modules/
 _output/
+dist/
 coverage/
 public/generated/
+tsconfig.tsbuildinfo

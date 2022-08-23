@@ -2,71 +2,141 @@
 import fs from 'fs';
 import util from 'util';
 
+import yargs from 'yargs';
 import chalk from 'chalk';
+import chalkTemplate from 'chalk-template';
 import moment from 'moment-timezone';
-import inquirer from 'inquirer';
-import PromptBase from 'inquirer/lib/prompts/base';
+import inquirer, {
+  Answers,
+  DistinctQuestion,
+  QuestionCollection,
+} from 'inquirer';
+import PromptBase from 'inquirer/lib/prompts/base.js';
 import autocomplete from 'inquirer-autocomplete-prompt';
 
-import * as helpers from '../helpers';
+import * as helpers from '../helpers.js';
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
+// for testing, we need a hook to inject a fake "prompt" handler...
+type PromptFn<T extends Answers = Answers> = (
+  questions: QuestionCollection<T>,
+  initialAnswers?: Partial<T>
+) => Promise<T> & { ui: inquirer.ui.Prompt<T> };
+
 inquirer.registerPrompt('autocomplete', autocomplete);
 
+// The NopQuestion is a sub-in for any other question...
+// interface NopQuestion<T extends Answers = Answers> {
+//   type: 'nop',
+// }
+type NopQuestion<T extends Answers = Answers> = Omit<
+  DistinctQuestion<T>,
+  'type'
+> & { type: 'nop' };
+
+type AutocompleteQuestion<T extends Answers = Answers> = Omit<
+  DistinctQuestion<T>,
+  'type'
+> & {
+  type: 'autocomplete';
+  source: (_: unknown, input: string) => Promise<string[]>;
+};
+
+type AnyQuestion<T extends Answers = Answers> =
+  | DistinctQuestion<T>
+  | AutocompleteQuestion<T>
+  | NopQuestion<T>;
+
 class NopPrompt extends PromptBase {
-  // eslint-disable-next-line promise/prefer-await-to-callbacks
-  _run(callback) {
-    // eslint-disable-next-line promise/prefer-await-to-callbacks
-    callback(this.opt.filter(this.opt.default));
+  _run(callback: (_: unknown) => void) {
+    callback(this.opt.filter?.(this.opt.default, {}));
   }
 }
 
 inquirer.registerPrompt('nop', NopPrompt);
 
+// Need a type for our config...
+interface ConfigHostInfo {
+  url: string;
+  key: string;
+  secret: string;
+}
+
+export interface ConfigFile {
+  _filename?: string;
+  _missing?: true;
+  hosts: Record<string, ConfigHostInfo>;
+  timezone?: string;
+}
+
+export interface OptsHandler {
+  (_: unknown): void;
+}
+
+interface Args {
+  host?: string;
+  zone?: string;
+}
+
+interface MyAnswers {
+  host: {
+    name: string;
+    secure: boolean;
+    url: string;
+    key: string;
+    secret: string;
+  };
+  timezone: string;
+}
+
 export default class Config {
-  constructor(cfg, handleGlobalOpts) {
+  cfg: ConfigFile;
+  handleGlobalOpts: OptsHandler;
+
+  constructor(cfg: ConfigFile, handleGlobalOpts: OptsHandler) {
     this.cfg = cfg;
     this.handleGlobalOpts = handleGlobalOpts;
   }
 
-  async createCommands() {
+  async createCommands(): Promise<yargs.CommandModule<Args, Args>[]> {
     return [
       {
         command: 'config',
         describe: 'help manage the .order-fetcher.json configuration',
-        builder: (yargs) => {
-          yargs.command({
-            command: 'view',
-            describe: 'view the current configuration',
-            handler: this.view.bind(this),
-          });
 
-          yargs.command({
-            command: 'init',
-            describe: 'create or overwrite the configuration',
-            handler: this.init.bind(this),
-          });
-
-          yargs.command({
-            command: 'add [host]',
-            describe: 'add a new host to the configuration',
-            handler: this.add.bind(this),
-          });
-
-          yargs.command({
-            command: 'remove [host]',
-            describe: 'remove a host from the configuration',
-            handler: this.remove.bind(this),
-          });
-
-          yargs.command({
-            command: 'timezone [zone]',
-            aliases: ['tz'],
-            describe: 'set the timezone in the configuration',
-            handler: this.timezone.bind(this),
-          });
+        handler: () => {
+          helpers.dbg(1, 'dummy handler to keep typescript happy?');
         },
+
+        builder: (yargs) =>
+          yargs
+            .command({
+              command: 'view',
+              describe: 'view the current configuration',
+              handler: this.view.bind(this),
+            })
+            .command({
+              command: 'init',
+              describe: 'create or overwrite the configuration',
+              handler: this.init.bind(this),
+            })
+            .command({
+              command: 'add [host]',
+              describe: 'add a new host to the configuration',
+              handler: this.add.bind(this),
+            })
+            .command({
+              command: 'remove [host]',
+              describe: 'remove a host from the configuration',
+              handler: this.remove.bind(this),
+            })
+            .command({
+              command: 'timezone [zone]',
+              aliases: ['tz'],
+              describe: 'set the timezone in the configuration',
+              handler: this.timezone.bind(this),
+            }),
       },
     ];
   }
@@ -77,15 +147,15 @@ export default class Config {
       return;
     }
 
-    helpers.out(chalk`
+    helpers.out(chalkTemplate`
 timezone: {cyan ${
       !this.cfg.timezone ||
-      chalk`{yellow (none configured, using ${moment.tz.guess()})}`
+      chalkTemplate`{yellow (none configured, using ${moment.tz.guess()})}`
     }}
 
 {gray hosts}${Object.entries(this.cfg.hosts)
       .map(
-        ([name, host]) => chalk`
+        ([name, host]) => chalkTemplate`
   {cyan ${name}}
     url   : {cyan.underline ${host.url}}
     key   : {gray ${host.key}}
@@ -95,9 +165,9 @@ timezone: {cyan ${
 `);
   }
 
-  async init() {
+  async init(_: yargs.ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
     if (!this.cfg._missing) {
-      const answers = await inquirer.prompt([
+      const answers = await (promptOverride ?? inquirer.prompt)([
         {
           name: 'overwrite',
           message: 'Do you want to overwrite the existing configuration?',
@@ -116,12 +186,12 @@ timezone: {cyan ${
       }
     }
 
-    const questions = [];
+    const questions: AnyQuestion<MyAnswers>[] = [];
 
     questions.push(...Config.hostQuestions());
     questions.push(...Config.timezoneQuestions());
 
-    const answers = await inquirer.prompt(questions);
+    const answers = await (promptOverride ?? inquirer.prompt)(questions);
 
     // console.dir({ answers });
     const { timezone, host } = answers;
@@ -136,8 +206,10 @@ timezone: {cyan ${
     this.writeConfig(cfg);
   }
 
-  async add(argv) {
-    const { host } = await inquirer.prompt(Config.hostQuestions(argv.host));
+  async add(argv: yargs.ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
+    const { host } = await (promptOverride ?? inquirer.prompt)(
+      Config.hostQuestions(argv.host)
+    );
     // console.dir({ argv, host });
     const { name, url, key, secret } = host;
 
@@ -152,9 +224,9 @@ timezone: {cyan ${
     this.writeConfig(cfg);
   }
 
-  async remove(argv) {
+  async remove(argv: yargs.ArgumentsCamelCase<Args>) {
     const { host } = argv;
-    if (!this.cfg.hosts[host]) {
+    if (!host || !this.cfg.hosts[host]) {
       const hosts = `"${Object.keys(this.cfg.hosts).join('", "')}"`;
       throw new helpers.UserError(
         `host "${host}" not found in configuration; try one of: ${hosts}`
@@ -166,8 +238,11 @@ timezone: {cyan ${
     this.writeConfig(cfg);
   }
 
-  async timezone(argv) {
-    const { timezone } = await inquirer.prompt(
+  async timezone(
+    argv: yargs.ArgumentsCamelCase<Args>,
+    promptOverride?: PromptFn
+  ) {
+    const { timezone } = await (promptOverride ?? inquirer.prompt)(
       Config.timezoneQuestions(argv.zone)
     );
 
@@ -179,8 +254,11 @@ timezone: {cyan ${
     this.writeConfig(cfg);
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async writeConfig(cfg) {
+  async writeConfig(cfg: ConfigFile) {
+    if (!cfg._filename) {
+      helpers.err(new Error('no filename found in config object'));
+      return;
+    }
     const toWrite = { ...cfg }; // shallow copy
     delete toWrite._missing;
     delete toWrite._filename;
@@ -192,14 +270,14 @@ timezone: {cyan ${
   }
 
   // eslint-disable-next-line class-methods-use-this
-  static hostQuestions(hostName) {
+  static hostQuestions(hostName?: string): AnyQuestion<MyAnswers>[] {
     return [
       {
         name: 'host.name',
         message: 'What is the nickname for your WooCommerce site?',
         type: hostName ? 'nop' : 'input',
         default: hostName,
-        validate: (name) =>
+        validate: (name: string) =>
           name && name.length > 0
             ? true
             : 'Please provide a name, it will be used as a convenient subcommand.',
@@ -249,11 +327,11 @@ timezone: {cyan ${
     ];
   }
 
-  static timezoneQuestions(zone) {
+  static timezoneQuestions(zone?: string): AnyQuestion<MyAnswers>[] {
     const allTimezones = moment.tz.names();
     const guessTimezone = moment.tz.guess();
 
-    let type = 'autocomplete';
+    let type: 'autocomplete' | 'nop' = 'autocomplete';
     let defaultTimezone = zone;
     if (zone) {
       const exact = allTimezones.find(uncaseExact(zone));
@@ -272,7 +350,7 @@ timezone: {cyan ${
         message: 'What timezone do you want to use?',
         type,
         default: defaultTimezone,
-        source: async (a, input) => {
+        source: async (a: unknown, input: string) => {
           return allTimezones.filter(uncaseIncludes(input || guessTimezone));
         },
       },
@@ -280,8 +358,8 @@ timezone: {cyan ${
   }
 }
 
-function required(name) {
-  return (input) => {
+function required(name: string) {
+  return (input: string) => {
     if (input) {
       return true;
     }
@@ -289,12 +367,12 @@ function required(name) {
   };
 }
 
-function uncaseExact(substring) {
+function uncaseExact(substring: string) {
   const lower = substring.toLowerCase();
-  return (item) => item.toLowerCase() === lower;
+  return (item: string) => item.toLowerCase() === lower;
 }
 
-function uncaseIncludes(substring) {
+function uncaseIncludes(substring: string) {
   const lower = substring.toLowerCase();
-  return (item) => item.toLowerCase().includes(lower);
+  return (item: string) => item.toLowerCase().includes(lower);
 }
