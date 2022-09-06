@@ -23,14 +23,14 @@
   },
   "scripts": {
     "build": "tsc",
+    "adhoc": "node ./dist/stub",
+    "adhoc:build": "npm run build -- --watch",
     "clean": "rm -r dist",
     "lint": "eslint ./src",
     "test": "ava",
     "coverage": "c8 --all --src src --per-file --reporter lcov --reporter text npm test",
     "codecov": "codecov",
     "release": "semantic-release",
-    "#start": "node ./lib/esm-stub.js",
-    "#list-skus": "node ./lib/esm-stub.js --list-skus",
     "snyk-protect": "snyk protect",
     "prepare": "(is-ci || husky install) && npm run snyk-protect"
   },
