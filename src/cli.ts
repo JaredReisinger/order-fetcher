@@ -2,6 +2,7 @@ import path from 'path';
 import util from 'util';
 import fs from 'fs';
 import chalk from 'chalk';
+import { fileURLToPath } from 'url';
 
 import yargsFn from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -70,11 +71,14 @@ async function main() {
 }
 
 async function loadConfig(): Promise<ConfigFile> {
-  const pkgInfo = await readPackageUp();
+  const pkgLoc = fileURLToPath(import.meta.url);
+  const pkgInfo = await readPackageUp({ cwd: pkgLoc });
   const filename = path.join(
     process.env.HOME ?? '.',
     `.${pkgInfo?.packageJson.name}.json`
   );
+  // can't really use dbg() since this is called *before* parsing options!
+  // dbg(0, 'checking for config', { filename });
   try {
     const data = await readFileAsync(filename);
     const cfg = JSON.parse(data.toString());
