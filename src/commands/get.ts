@@ -273,7 +273,7 @@ Examples:
 
   generateCsv(items: WooItem[], currencies: WooCurrencies) {
     const fields = this.defineFields(items, currencies);
-    const csv = json2csv.parse(items, { fields });
+    const csv = json2csv.parse(items, { fields, withBOM: true });
     return csv;
   }
 
