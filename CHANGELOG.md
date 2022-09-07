@@ -1,3 +1,12 @@
+## [3.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.1...v3.0.2) (2022-09-07)
+
+
+### Bug Fixes
+
+* **config:** fix config-file-finding logic ([4718b42](https://github.com/JaredReisinger/order-fetcher/commit/4718b42d192e3738ab53473606cd549b2183b56c))
+* **csv:** add UTF BOM to output CSV file ([1f77994](https://github.com/JaredReisinger/order-fetcher/commit/1f7799444649b6fab56e121bc2cfdc59799474d6)), closes [#120](https://github.com/JaredReisinger/order-fetcher/issues/120)
+* **dependencies:** update all dependencies (except inquirer) ([7b3f060](https://github.com/JaredReisinger/order-fetcher/commit/7b3f06057f37290cc251443b8e8cf1a17efc0db8))
+
 ## [3.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.0...v3.0.1) (2022-08-23)
 
 
