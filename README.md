@@ -23,14 +23,14 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 
 ### Top-level commands/options
 
-| command                     | description                                                       |
-| --------------------------- | ----------------------------------------------------------------- |
-| `config`                    | shows configuration information                                   |
-| `get` _(or host nickname)_  | retrieves orders from a WooCommerce site                          |
-| `list` _(or host nickname)_ | summarize skus and/or statuses from a WooCommerce site (TODO!)    |
-| `-v`, `--verbose`           | increase verbosity of logging output, can be given multiple times |
-| `-h`, `--help`              | output usage information                                          |
-| `--version`                 | output the version number                                         |
+| command                         | description                                                        |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `config`                        | shows configuration information                                    |
+| `get` _(or host nickname)_      | retrieves orders from a WooCommerce site                           |
+| ~~`list` _(or host nickname)_~~ | ~~summarize skus and/or statuses from a WooCommerce site~~ (TODO!) |
+| `-v`, `--verbose`               | increase verbosity of logging output, can be given multiple times  |
+| `-h`, `--help`                  | output usage information                                           |
+| `--version`                     | output the version number                                          |
 
 ### `config` commands/options
 
@@ -45,15 +45,16 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 
 ### Get / Host-nickname commands/options
 
-| option                   | description                                                         |
-| ------------------------ | ------------------------------------------------------------------- |
-| `list`                   | summarize skus and/or statuses from a WooCommerce site (TODO)       |
-| `--host` _host_          | WooCommerce host to use _(**only** for `orders get`)_               |
-| `--after` _date_         | include only orders after the date                                  |
-| `--before` _date_        | include only orders before the date                                 |
-| `--status` _status_      | include only orders with the given status                           |
-| `--sku` _sku_            | filter to the specific sku, can be given multiple times (default: ) |
-| `-o`, `--out` _filename_ | file to write (CSV format)                                          |
+| option                     | description                                                         |
+| -------------------------- | ------------------------------------------------------------------- |
+| ~~`list`~~                 | ~~summarize skus and/or statuses from a WooCommerce site~~ (TODO)   |
+| `--host` _host_            | WooCommerce host to use _(**only** for `orders get`)_               |
+| `--after` _date_           | include only orders after the date                                  |
+| `--before` _date_          | include only orders before the date                                 |
+| `--status` _status_        | include only orders with the given status                           |
+| `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: ) |
+| `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )   |
+| `-o`, `--out` _filename_   | file to write (CSV format)                                          |
 
 ### Best practices
 
