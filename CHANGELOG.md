@@ -1,3 +1,10 @@
+## [3.0.3](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.2...v3.0.3) (2022-09-07)
+
+
+### Bug Fixes
+
+* **readme:** update README (marked as fix to force a release) ([52af466](https://github.com/JaredReisinger/order-fetcher/commit/52af466381e07334748da91bac2c6cb4df3654f2))
+
 ## [3.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.1...v3.0.2) (2022-09-07)
 
 
