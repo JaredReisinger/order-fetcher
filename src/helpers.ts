@@ -60,13 +60,12 @@ export function out(
   chalker?: ChalkInstance,
   outputter?: typeof console.log
 ) {
-  // eslint-disable-next-line no-param-reassign
-  outputter = outputter || console.log.bind(console);
+  const outputFn = outputter || console.log.bind(console);
+  let formattedMsg = msg;
   if (chalker) {
-    // eslint-disable-next-line no-param-reassign
-    msg = chalker(msg);
+    formattedMsg = chalker(formattedMsg);
   }
-  outputter(msg);
+  outputFn(formattedMsg);
 }
 
 // The additional colors only work with 256+ colors.  ConEmu can only support
@@ -93,6 +92,7 @@ export function dbg(level: number, msg: string, obj?: unknown) {
     return;
   }
 
+  let formattedMsg = msg;
   const msgChalkerLevel = level <= maxLevels ? level : maxLevels;
   const chalker = levelChalkers[msgChalkerLevel];
 
@@ -102,8 +102,10 @@ export function dbg(level: number, msg: string, obj?: unknown) {
     if (obj instanceof Object && 'length' in obj) {
       extra = ` (${obj['length']})`;
     }
-    // eslint-disable-next-line no-param-reassign
-    msg = `${msg}${extra}:\n${levelChalkers[msgChalkerLevel + objLevels](
+
+    formattedMsg = `${formattedMsg}${extra}:\n${levelChalkers[
+      msgChalkerLevel + objLevels
+    ](
       util.inspect(obj, {
         colors: false,
         depth: 5,
@@ -118,7 +120,7 @@ export function dbg(level: number, msg: string, obj?: unknown) {
   // }
 
   // out(msg, level <= 1 ? chalk.gray : chalk.white);
-  out(msg, chalker);
+  out(formattedMsg, chalker);
 }
 
 export function err(e: Error | string, chalker?: ChalkInstance) {

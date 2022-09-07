@@ -38,7 +38,11 @@ export default class WooClient {
   // are no more!  The 'params' argument should be a simple object.
   async getAll<T, K extends KeyProps<T> = KeyProps<T>>(
     endpoint: string,
-    params: string | Record<string, string> | url.URLSearchParams | undefined,
+    initialParams:
+      | string
+      | Record<string, string>
+      | url.URLSearchParams
+      | undefined,
     keyName: K
   ) {
     const keys: Record<PropertyKey, boolean> = {};
@@ -46,8 +50,7 @@ export default class WooClient {
     let page = 1;
     let fetchPage = true;
 
-    // eslint-disable-next-line no-param-reassign
-    params = new url.URLSearchParams(params);
+    let params = new url.URLSearchParams(initialParams);
 
     while (fetchPage) {
       fetchPage = false; // until proven otherwise
@@ -89,7 +92,6 @@ export default class WooClient {
 
       const links = linkParser(response.headers.link);
       if (links && links.next) {
-        // eslint-disable-next-line no-param-reassign
         params = paramsFromLink(links.next);
         fetchPage = true;
         page++;

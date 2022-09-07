@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
 import util from 'util';
 
@@ -269,7 +268,6 @@ timezone: {cyan ${
     await writeFileAsync(cfg._filename, formatted, 'utf8');
   }
 
-  // eslint-disable-next-line class-methods-use-this
   static hostQuestions(hostName?: string): AnyQuestion<MyAnswers>[] {
     return [
       {

@@ -49,12 +49,10 @@ export default class WooOrder {
   }
 
   static simplifyBilling(wcBilling: Billing): SimplifiedBilling {
-    // eslint-disable-next-line camelcase
     const name = `${wcBilling.first_name || ''} ${
       wcBilling.last_name || ''
     }`.trim();
 
-    // eslint-disable-next-line camelcase
     const addressParts = [];
     addressParts.push(wcBilling.address_1);
     if (wcBilling.address_2) {
@@ -63,7 +61,6 @@ export default class WooOrder {
     addressParts.push(wcBilling.city);
     addressParts.push(`${wcBilling.state} ${wcBilling.postcode}`.trim());
 
-    // eslint-disable-next-line camelcase
     const address = addressParts.join(', ');
 
     const phone = wcutils.normalizePhone(wcBilling.phone);
