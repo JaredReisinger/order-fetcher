@@ -1,6 +1,8 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { FieldValueCallback } from 'json2csv';
+import yargs from 'yargs/yargs';
+import moment from 'moment-timezone';
 
 import WooClient from '../wc/WooClient.js';
 import WooItem from '../wc/WooItem.js';
@@ -63,6 +65,17 @@ function createGet() {
   );
 }
 
+// async function runCommand(...args) {
+//   process.argv = [
+//     "node", // Not used but a value is required at this index in the array
+//     "cli.js", // Not used but a value is required at this index in the array
+//     ...args,
+//   ];
+
+//   // Require the yargs CLI script
+//   return require("./cli");
+// }
+
 test('Get.createCommands() should return a Promise', async (t) => {
   const get = createGet();
   const result = get.createCommands();
@@ -70,12 +83,70 @@ test('Get.createCommands() should return a Promise', async (t) => {
   await result;
 });
 
+test('Get.createCommand("foo") should return a Promise', async (t) => {
+  const get = createGet();
+  const result = get.createCommand('foo');
+  t.true(result instanceof Promise);
+  await result;
+});
+
+test('Get.createCommand().builder should succeed', async (t) => {
+  const get = createGet();
+  const result = await get.createCommand();
+
+  t.truthy(result.builder);
+
+  t.notThrows(() => {
+    if (result.builder instanceof Function) {
+      result.builder(yargs([]));
+    }
+  });
+});
+
+test('Get.createCommand("foo").builder should succeed', async (t) => {
+  const get = createGet();
+  const result = await get.createCommand('foo');
+
+  t.truthy(result.builder);
+
+  t.notThrows(() => {
+    if (result.builder instanceof Function) {
+      result.builder(yargs([]));
+    }
+  });
+});
+
+test('Get.createCommand("foo").builder supports after/before parsing', async (t) => {
+  const get = createGet();
+  const builder = (await get.createCommand('foo')).builder;
+
+  t.true(builder instanceof Function);
+  if (builder instanceof Function) {
+    const parser = await builder(yargs());
+    const argv = await parser.parse([
+      '--after',
+      '2022-01-01',
+      '--before',
+      '2022-12-31',
+    ]);
+    t.true(moment.isMoment(argv.after));
+    t.true(moment.isMoment(argv.before));
+  }
+});
+
+const meta = {
+  allBlank: false,
+  allIdentical: false,
+  maximumWidth: 100,
+};
+
 test('Get.getValue() should extract a field', (t) => {
   const get = createGet();
   t.is(
     get.getValue({ field: 'FIELD' } as unknown as WooItem, {
       value: 'field',
       label: '',
+      meta,
     }),
     'FIELD'
   );
@@ -87,6 +158,7 @@ test('Get.getValue() should handle nested fields', (t) => {
     get.getValue({ outer: { inner: 'FIELD' } } as unknown as WooItem, {
       value: 'outer.inner',
       label: '',
+      meta,
     }),
     'FIELD'
   );
@@ -99,6 +171,7 @@ test('Get.getValue() should handle extractor functions', (t) => {
       value: (({ field }: { field: string }) =>
         `FN(${field})`) as unknown as FieldValueCallback<WooItem>,
       label: '',
+      meta,
     }),
     'FN(FIELD)'
   );
@@ -117,11 +190,20 @@ test('Get.collectMetaFields() should return meta field descriptors', (t) => {
   const result = get.collectMetaFields([
     { meta: { meta1: '' } },
     { meta: { meta2: '' } },
-    { meta: { meta1: '' } },
+    { meta: { meta1: 'SOME-VALUE' } },
   ] as unknown as WooItem[]);
   t.deepEqual(result, [
-    { label: 'meta1', value: 'meta["meta1"]' },
-    { label: 'meta2', value: 'meta["meta2"]' },
+    {
+      label: 'meta1',
+      value: 'meta["meta1"]',
+      // value analysis hasn't happened yet!
+      meta: { allBlank: true, allIdentical: true, maximumWidth: 5 },
+    },
+    {
+      label: 'meta2',
+      value: 'meta["meta2"]',
+      meta: { allBlank: true, allIdentical: true, maximumWidth: 5 },
+    },
   ]);
 });
 
@@ -156,6 +238,18 @@ test('Get.run() should return a Promise', async (t) => {
   const result = get.run('foo', {}, client);
   t.true(result instanceof Promise);
   await result;
+});
+
+test('Get.run() requires a host', async (t) => {
+  const get = createGet();
+  const builder = (await get.createCommand()).builder;
+
+  t.true(builder instanceof Function);
+  if (builder instanceof Function) {
+    const parser = await builder(yargs());
+    const argv = await parser.parse([], () => {});
+    await t.throwsAsync(() => get.run(undefined, argv));
+  }
 });
 
 test('Get.run() should request currencies', async (t) => {

@@ -23,14 +23,13 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 
 ### Top-level commands/options
 
-| command                         | description                                                        |
-| ------------------------------- | ------------------------------------------------------------------ |
-| `config`                        | shows configuration information                                    |
-| `get` _(or host nickname)_      | retrieves orders from a WooCommerce site                           |
-| ~~`list` _(or host nickname)_~~ | ~~summarize skus and/or statuses from a WooCommerce site~~ (TODO!) |
-| `-v`, `--verbose`               | increase verbosity of logging output, can be given multiple times  |
-| `-h`, `--help`                  | output usage information                                           |
-| `--version`                     | output the version number                                          |
+| command                    | description                                                       |
+| -------------------------- | ----------------------------------------------------------------- |
+| `config`                   | shows configuration information                                   |
+| `get` _(or host nickname)_ | retrieves orders from a WooCommerce site                          |
+| `-v`, `--verbose`          | increase verbosity of logging output, can be given multiple times |
+| `-h`, `--help`             | output usage information                                          |
+| `--version`                | output the version number                                         |
 
 ### `config` commands/options
 
@@ -38,22 +37,30 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 | ----------------------------- | ----------------------------------------------------------- |
 | `init`                        | interactive first-time configuration set up                 |
 | `view`                        | show current configuration                                  |
-| `add` _[host]_                | add a new WooCommerce host (interactive, like init)         |
-| `remove` _[host]_             | remove an existing WooCommerce host                         |
+| `add` _[host-nickname]_       | add a new WooCommerce host (interactive, like init)         |
+| `remove` _[host-nickname]_    | remove an existing WooCommerce host                         |
 | `timezone` (or `tz`) _[zone]_ | change the timezone (interactive if `zone` is not provided) |
 | `-h`, `--help`                | output usage information                                    |
 
-### Get / Host-nickname commands/options
+### `get` (or _`host-nickname`_) options
 
 | option                     | description                                                         |
 | -------------------------- | ------------------------------------------------------------------- |
-| ~~`list`~~                 | ~~summarize skus and/or statuses from a WooCommerce site~~ (TODO)   |
-| `--host` _host_            | WooCommerce host to use _(**only** for `orders get`)_               |
+| `--host` _host-nickname_   | WooCommerce host to use _(**only** for `orders get`)_               |
 | `--after` _date_           | include only orders after the date                                  |
 | `--before` _date_          | include only orders before the date                                 |
 | `--status` _status_        | include only orders with the given status                           |
 | `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: ) |
 | `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )   |
+| `--list-skus`              | list the skus found in the orders                                   |
+| `--list-statuses`          | list the statuses found in the orders                               |
+| `--list-columns`           | list the available columns found in the items                       |
+| `--omit-blanks`            | omits columns where every item's value is blank or missing          |
+| `--omit-identical`         | omits columns where every item's value is identical                 |
+| `--omit-payment`           | omits payment columns (including payer address and phone)           |
+| `--omit` _column_          | omits a specific column                                             |
+| `--include` _column_       | includes a specific column                                          |
+| `--columns` _column-list_  | selects an exact set of columns to display (comma-separated names)  |
 | `-o`, `--out` _filename_   | file to write (CSV format)                                          |
 
 ### Best practices
@@ -61,6 +68,12 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 For WooCommerce installations with a large number of historical orders, making use of the `--after` options is highly recommended. Similarly, use `--status processing` to only include orders that haven't been handled yet. (And then mark those orders as "completed" as soon as you deal with them.)
 
 When generating CSV output, the columns come directly from the item information in WooCommerce. More than likely, you'll want to use the `--sku` option to create CSV files on a sku-by-sku basis.
+
+## About column filtering
+
+The various `--omit...` and `--include` options control whether columns are included or omitted in the output. As a rule of thumb, columns are included for CSV file output for consistency across invocations, and the `--omit-...` options are enabled by default for screen output to reduce line-wrapping. If you need to _not_ omit columns for screen output, you can prefixthe option with `no`, as in `--no-omit-identical`.
+
+If the `--omit-...` options are too coarse, you can enable or disable individual columns using the `--include` and `--omit` options, or for complete control use the `--columns` option to specify _exactly_ what columns you want displayed and in what order they will appear. Using `--list-columns` will list all of the column names available. Do note that unless you use `--columns` to specify an exact set, the following columns are _always_ included: "order#", "date", "name", "email", "qty", and "total".
 
 ### Examples
 
