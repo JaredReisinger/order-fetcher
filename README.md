@@ -1,11 +1,13 @@
 # order-fetcher
 
-Retrieves WooComerce order information and saves it as a CSV file.
+Retrieves WooComerce order information and displays it in your terminal or saves it as a CSV file.
 
 [![npm version](https://img.shields.io/npm/v/order-fetcher.svg?logo=npm)](https://www.npmjs.com/package/order-fetcher)
 [![build status](https://img.shields.io/github/workflow/status/JaredReisinger/order-fetcher/build/master.svg?logo=github)](https://github.com/JaredReisinger/order-fetcher/actions?query=workflow%3Abuild+branch%3Amaster)
 [![code coverage](https://img.shields.io/codecov/c/github/JaredReisinger/order-fetcher.svg?logo=codecov)](https://codecov.io/github/JaredReisinger/order-fetcher)
 [![snyk vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/JaredReisinger/order-fetcher.svg?logo=snyk)](https://snyk.io/test/github/JaredReisinger/order-fetcher)
+
+![](./docs/order-fetcher.png)
 
 ## Getting started
 
@@ -69,7 +71,7 @@ For WooCommerce installations with a large number of historical orders, making u
 
 When generating CSV output, the columns come directly from the item information in WooCommerce. More than likely, you'll want to use the `--sku` option to create CSV files on a sku-by-sku basis.
 
-## About column filtering
+### About column filtering
 
 The various `--omit...` and `--include` options control whether columns are included or omitted in the output. As a rule of thumb, columns are included for CSV file output for consistency across invocations, and the `--omit-...` options are enabled by default for screen output to reduce line-wrapping. If you need to _not_ omit columns for screen output, you can prefixthe option with `no`, as in `--no-omit-identical`.
 
