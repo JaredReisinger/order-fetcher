@@ -1,12 +1,14 @@
 import test from 'ava';
 // import 'chai/register-should';
 import sinon from 'sinon';
+import yargs from 'yargs/yargs';
 
 import Config from './config.js';
 
-function createConfig() {
+function createConfig(timezone?: string) {
   return new Config(
     {
+      timezone,
       hosts: {
         foo: {
           url: 'FOO.URL',
@@ -26,8 +28,30 @@ test('Config.createCommands() should return a Promise', async (t) => {
   await result;
 });
 
+test('Config.createCommands()[0].builder should succeed', async (t) => {
+  const config = createConfig();
+  const result = await config.createCommands();
+
+  t.is(result.length, 1);
+
+  t.truthy(result[0].builder);
+
+  t.notThrows(() => {
+    if (result[0].builder instanceof Function) {
+      result[0].builder(yargs([]));
+    }
+  });
+});
+
 test('Config.view() should return a Promise', async (t) => {
   const config = createConfig();
+  const result = config.view();
+  t.true(result instanceof Promise);
+  await result;
+});
+
+test('Config.view() should return a Promise (with timezone)', async (t) => {
+  const config = createConfig('UTC');
   const result = config.view();
   t.true(result instanceof Promise);
   await result;
@@ -111,6 +135,7 @@ test('Config.add() should add a new host', async (t) => {
   await result;
 
   t.deepEqual(write.args[0][0], {
+    timezone: undefined,
     hosts: {
       foo: {
         url: 'FOO.URL',
@@ -141,6 +166,7 @@ test('Config.remove() should remove a host', async (t) => {
   await result;
 
   t.deepEqual(write.args[0][0], {
+    timezone: undefined,
     hosts: {},
   });
 
