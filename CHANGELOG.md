@@ -1,3 +1,15 @@
+# [3.1.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.3...v3.1.0) (2022-09-08)
+
+
+### Bug Fixes
+
+* **config:** fix timezone display in `config view` ([36b4708](https://github.com/JaredReisinger/order-fetcher/commit/36b47082b95de1f188a2119774863c4ebf45bb2c))
+
+
+### Features
+
+* **columns:** add column filtering ([257b89e](https://github.com/JaredReisinger/order-fetcher/commit/257b89e8718326763fbd1659427716954dca7be8))
+
 ## [3.0.3](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.2...v3.0.3) (2022-09-07)
 
 
