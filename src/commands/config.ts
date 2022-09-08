@@ -147,12 +147,13 @@ export default class Config {
     }
 
     helpers.out(chalkTemplate`
-timezone: {cyan ${
-      !this.cfg.timezone ||
-      chalkTemplate`{yellow (none configured, using ${moment.tz.guess()})}`
-    }}
+timezone: ${
+      this.cfg.timezone
+        ? chalk.cyan(this.cfg.timezone)
+        : chalk.yellow(`(none configured, using ${moment.tz.guess()})`)
+    }
 
-{gray hosts}${Object.entries(this.cfg.hosts)
+hosts:${Object.entries(this.cfg.hosts)
       .map(
         ([name, host]) => chalkTemplate`
   {cyan ${name}}
