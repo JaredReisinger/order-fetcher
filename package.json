@@ -48,7 +48,7 @@
     "parse-link-header": "^2.0.0",
     "printable-characters": "^1.0.42",
     "read-pkg-up": "^9.1.0",
-    "snyk": "^1.998.0",
+    "snyk": "^1.999.0",
     "table": "^6.8.0",
     "woocommerce-api": "^1.5.0",
     "yargs": "^17.5.1"
@@ -65,7 +65,7 @@
     "@types/inquirer-autocomplete-prompt": "^1.3.5",
     "@types/json2csv": "^5.0.3",
     "@types/lodash.get": "^4.4.7",
-    "@types/node": "^18.7.15",
+    "@types/node": "^18.7.16",
     "@types/parse-link-header": "^2.0.0",
     "@types/sinon": "^10.0.13",
     "@types/yargs": "^17.0.12",
