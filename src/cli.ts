@@ -4,7 +4,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 
-import yargsFn from 'yargs';
+import yargsFn, { ArgumentsCamelCase, Argv, CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { readPackageUp } from 'read-pkg-up';
@@ -12,7 +12,6 @@ import { readPackageUp } from 'read-pkg-up';
 import * as commands from './commands/index.js';
 import { dbg, err, setVerbosity, UserError } from './helpers.js';
 import { ConfigFile } from './commands/config.js';
-import { ArgumentsCamelCase, Argv, CommandModule } from 'yargs';
 
 const readFileAsync = util.promisify(fs.readFile);
 
