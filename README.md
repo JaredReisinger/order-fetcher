@@ -3,7 +3,7 @@
 Retrieves WooComerce order information and displays it in your terminal or saves it as a CSV file.
 
 [![npm version](https://img.shields.io/npm/v/order-fetcher.svg?logo=npm)](https://www.npmjs.com/package/order-fetcher)
-[![build status](https://img.shields.io/github/workflow/status/JaredReisinger/order-fetcher/build/master.svg?logo=github)](https://github.com/JaredReisinger/order-fetcher/actions?query=workflow%3Abuild+branch%3Amaster)
+[![build status](https://img.shields.io/github/actions/workflow/status/JaredReisinger/order-fetcher/build.yml?branch=main&logo=github)](https://github.com/JaredReisinger/order-fetcher/actions?query=workflow%3Abuild+branch%3Amain)
 [![code coverage](https://img.shields.io/codecov/c/github/JaredReisinger/order-fetcher.svg?logo=codecov)](https://codecov.io/github/JaredReisinger/order-fetcher)
 [![snyk vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/JaredReisinger/order-fetcher.svg?logo=snyk)](https://snyk.io/test/github/JaredReisinger/order-fetcher)
 
