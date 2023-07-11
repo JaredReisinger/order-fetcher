@@ -12,7 +12,7 @@ import { readPackageUp } from 'read-pkg-up';
 import * as commands from './commands/index.js';
 import { dbg, err, setVerbosity, UserError } from './helpers.js';
 import { ConfigFile } from './commands/config.js';
-import yargs from 'yargs';
+import { ArgumentsCamelCase, Argv, CommandModule } from 'yargs';
 
 const readFileAsync = util.promisify(fs.readFile);
 
@@ -33,7 +33,7 @@ main().catch((e) => {
 async function main() {
   const cfg = await loadConfig();
 
-  const yargs = yargsFn(hideBin(process.argv)) as yargs.Argv<Args>;
+  const yargs = yargsFn(hideBin(process.argv)) as Argv<Args>;
 
   // options used in common for most commands...
   yargs
@@ -50,7 +50,7 @@ async function main() {
   dbg(5, 'commands', { cmds });
   // NOTE: the Typescript casting here is gross... not sure how to tell yargs
   // about arguments that come from sub-commands, and when that's okay, etc.
-  cmds.forEach((cmd) => yargs.command(cmd as yargs.CommandModule<Args, Args>));
+  cmds.forEach((cmd) => yargs.command(cmd as CommandModule<Args, Args>));
 
   if (process.stdout.isTTY) {
     // We could allow arbitrarily wide help output, but it looks pretty bad
@@ -96,7 +96,7 @@ async function loadConfig(): Promise<ConfigFile> {
   }
 }
 
-function handleGlobalOpts(argv: unknown) {
+function handleGlobalOpts(argv: ArgumentsCamelCase<Args>) {
   dbg(2, 'handle global opts', argv);
   if (argv instanceof Object && 'verbose' in argv)
     setVerbosity(argv['verbose']);

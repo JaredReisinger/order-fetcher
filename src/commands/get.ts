@@ -1,7 +1,7 @@
 import util from 'util';
 import fs from 'fs';
 
-import yargs from 'yargs';
+import { ArgumentsCamelCase, CommandBuilder, CommandModule } from 'yargs';
 import moment from 'moment-timezone';
 import chalk from 'chalk';
 import chalkTemplate from 'chalk-template';
@@ -84,7 +84,7 @@ export default class Get {
     this.handleGlobalOpts = handleGlobalOpts;
   }
 
-  async createCommands(): Promise<yargs.CommandModule<Args, Args>[]> {
+  async createCommands(): Promise<CommandModule<Args, Args>[]> {
     // create the base 'get' command, and also a per-host version that makes
     // the command-line easier for the user.
     const cmds = Object.keys(this.hosts).map((host) =>
@@ -115,7 +115,7 @@ export default class Get {
   //              function accepting and returning a yargs instance
   //
   //   handler:   a function which will be passed the parsed argv.
-  async createCommand(host?: string): Promise<yargs.CommandModule<Args, Args>> {
+  async createCommand(host?: string): Promise<CommandModule<Args, Args>> {
     const command = host || 'get';
     // const aliases = '*'; // this is the default command
     const aliases = undefined;
@@ -123,7 +123,7 @@ export default class Get {
       host ? `the ${host}` : 'a'
     } WooCommerce site`;
 
-    const builder: yargs.CommandBuilder<Args, Args> = (yargs) => {
+    const builder: CommandBuilder<Args, Args> = (yargs) => {
       if (!host) {
         yargs.option('host', {
           describe: 'Connect to the given host',
@@ -286,7 +286,7 @@ Examples:
 
   async run(
     seededHost: string | undefined,
-    argv: yargs.ArgumentsCamelCase<Args>,
+    argv: ArgumentsCamelCase<Args>,
     clientOverride?: WooClient
   ) {
     // REVIEW: if we make a base class for the command, the wrapper and calling
@@ -658,7 +658,7 @@ Examples:
 }
 
 // REVIEW: should this move to WooClient?
-function createParams(opts: yargs.ArgumentsCamelCase<Args>) {
+function createParams(opts: ArgumentsCamelCase<Args>) {
   const params: Record<string, string> = {
     per_page: '100',
     // per_page: '10',
