@@ -23,8 +23,14 @@ type KeyProps<T> = keyof {
 export default class WooClient {
   _client: WooCommerce;
 
-  constructor(urlStr: string, key: string, secret: string) {
+  constructor(
+    urlStr: string,
+    key: string,
+    secret: string,
+    opts?: Partial<ConstructorParameters<typeof WooCommerce>[0]>
+  ) {
     this._client = new WooCommerce({
+      ...(opts ?? {}),
       wpAPI: true,
       version: 'wc/v3', // v2 has an issue with the item metadata!
       url: urlStr,

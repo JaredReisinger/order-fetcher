@@ -1,11 +1,20 @@
+/* eslint-disable no-use-before-define */
 module 'woocommerce-api' {
   export default class WooCommerce {
     constructor(opts: {
-      wpAPI: boolean;
-      version: 'wc/v3' | 'wc/v2'; // v2 has an issue with the item metadata!
       url: string;
+      wpAPI?: boolean;
+      wpAPIPrefix?: string;
+      version?: 'wc/v3' | 'wc/v2'; // v2 has an issue with the item MetaDatum!
+      isSsl?: RegExp | boolean;
       consumerKey: string;
       consumerSecret: string;
+      verifySsl?: boolean;
+      encoding?: string;
+      queryStringAuth?: boolean;
+      port?: string;
+      timeout?: unknown;
+      agent?: unknown;
     });
 
     getAsync(uri: string): Promise<{
@@ -21,6 +30,7 @@ module 'woocommerce-api' {
   }
 
   // taken from https://github.com/rrrhys/wootoapp-rewrite/blob/master/app/types/woocommerce.d.ts
+  // `any` replaced with `unknown`
 
   // export interface Category {
   // 	id: number;
@@ -45,11 +55,11 @@ module 'woocommerce-api' {
   // 	height: string;
   // }
 
-  // export interface MetaDatum {
-  // 	id: number;
-  // 	key: string;
-  // 	value: string;
-  // }
+  export interface MetaDatum {
+    id: number;
+    key: string;
+    value: string;
+  }
 
   // export interface Product {
   // 	id: number;
@@ -80,7 +90,7 @@ module 'woocommerce-api' {
   // 	total_sales: number;
   // 	virtual: boolean;
   // 	downloadable: boolean;
-  // 	downloads: any[];
+  // 	downloads: unknown[];
   // 	download_limit: number;
   // 	download_expiry: number;
   // 	external_url: string;
@@ -109,12 +119,12 @@ module 'woocommerce-api' {
   // 	parent_id: number;
   // 	purchase_note: string;
   // 	categories: Partial<Category>[];
-  // 	tags: any[];
+  // 	tags: unknown[];
   // 	images: Image[];
   // 	attributes: Attribute[];
-  // 	default_attributes: any[];
+  // 	default_attributes: unknown[];
   // 	variations: number[];
-  // 	grouped_products: any[];
+  // 	grouped_products: unknown[];
   // 	menu_order: number;
   // 	meta_data: MetaDatum[];
   // 	_links: Links;
@@ -131,8 +141,8 @@ module 'woocommerce-api' {
     subtotal_tax: string;
     total: string;
     total_tax: string;
-    taxes: any[];
-    meta_data: MetaData[];
+    taxes: unknown[];
+    meta_data: MetaDatum[];
     sku: string;
     price: number;
   }
@@ -144,8 +154,8 @@ module 'woocommerce-api' {
     instance_id: string;
     total: string;
     total_tax: string;
-    taxes: any[];
-    meta_data: any[];
+    taxes: unknown[];
+    meta_data: unknown[];
   }
 
   // interface Meta_Data_Line_Item {
@@ -153,6 +163,7 @@ module 'woocommerce-api' {
   // 	key: string;
   // 	value: string;
   // }
+
   // interface Cart {
   // 	// built from my own object sending in, disregard if necessary!
   // 	payment_method: string;
@@ -193,12 +204,6 @@ module 'woocommerce-api' {
   // 	option: string;
   // }
 
-  export interface MetaData {
-    id: number;
-    key: string;
-    value: string;
-  }
-
   // export interface Up {
   // 	href: string;
   // }
@@ -218,7 +223,7 @@ module 'woocommerce-api' {
   // 	shipping: Shipping;
   // 	is_paying_customer: boolean;
   // 	avatar_url: string;
-  // 	meta_data: MetaData[];
+  // 	meta_data: MetaDatum[];
   // 	_links: Links;
   // }
 
@@ -252,18 +257,18 @@ module 'woocommerce-api' {
     payment_method: string;
     payment_method_title: string;
     transaction_id: string;
-    date_paid?: any;
-    date_paid_gmt?: any;
-    date_completed?: any;
-    date_completed_gmt?: any;
+    date_paid?: unknown;
+    date_paid_gmt?: unknown;
+    date_completed?: unknown;
+    date_completed_gmt?: unknown;
     cart_hash: string;
-    meta_data: any[];
+    meta_data: MetaDatum[]; // was any[]
     line_items: LineItem[];
-    tax_lines: any[];
+    tax_lines: unknown[];
     shipping_lines: ShippingLine[];
-    fee_lines: any[];
-    coupon_lines: any[];
-    refunds: any[];
+    fee_lines: unknown[];
+    coupon_lines: unknown[];
+    refunds: unknown[];
     _links: Links;
   }
 
@@ -312,22 +317,22 @@ module 'woocommerce-api' {
   // 	price: string;
   // 	regular_price: string;
   // 	sale_price: string;
-  // 	date_on_sale_from?: any;
-  // 	date_on_sale_from_gmt?: any;
-  // 	date_on_sale_to?: any;
-  // 	date_on_sale_to_gmt?: any;
+  // 	date_on_sale_from?: unknown;
+  // 	date_on_sale_from_gmt?: unknown;
+  // 	date_on_sale_to?: unknown;
+  // 	date_on_sale_to_gmt?: unknown;
   // 	on_sale: boolean;
   // 	visible: boolean;
   // 	purchasable: boolean;
   // 	virtual: boolean;
   // 	downloadable: boolean;
-  // 	downloads: any[];
+  // 	downloads: unknown[];
   // 	download_limit: number;
   // 	download_expiry: number;
   // 	tax_status: string;
   // 	tax_class: string;
   // 	manage_stock: boolean;
-  // 	stock_quantity?: any;
+  // 	stock_quantity?: unknown;
   // 	in_stock: boolean;
   // 	backorders: string;
   // 	backorders_allowed: boolean;
@@ -339,7 +344,7 @@ module 'woocommerce-api' {
   // 	image: Image;
   // 	attributes: Attribute[];
   // 	menu_order: number;
-  // 	meta_data: MetaData[];
+  // 	meta_data: MetaDatum[];
   // 	_links: Links;
   // }
 

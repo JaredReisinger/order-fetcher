@@ -71,6 +71,7 @@ interface Args {
   include?: string[];
   columns?: string;
   out?: string;
+  verifySsl?: boolean;
 }
 
 export default class Get {
@@ -213,6 +214,10 @@ export default class Get {
             'File to write (CSV format) (cannot be used with "--list-skus")',
           conflicts: ['list-skus', 'list-statuses'],
         })
+        .option('verify-ssl', {
+          describe: 'Whether to verify the SSL certificate from the host',
+          boolean: true,
+        })
         // .group(['after', 'before', 'status'], 'Order Filtering')
         // .group(['sku', 'sku-prefix'], 'Item Filtering')
         // .group(
@@ -318,7 +323,10 @@ Examples:
     }
 
     const client =
-      clientOverride ?? new WooClient(host.url, host.key, host.secret);
+      clientOverride ??
+      new WooClient(host.url, host.key, host.secret, {
+        verifySsl: argv.verifySsl,
+      });
 
     // Get orders/items and the currencies in parallel.  We could delay awaiting
     // on the currencies until just before generating the CSV, but the code is a
