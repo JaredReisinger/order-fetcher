@@ -23,8 +23,14 @@ type KeyProps<T> = keyof {
 export default class WooClient {
   _client: WooCommerce;
 
-  constructor(urlStr: string, key: string, secret: string) {
+  constructor(
+    urlStr: string,
+    key: string,
+    secret: string,
+    opts?: Partial<ConstructorParameters<typeof WooCommerce>[0]>
+  ) {
     this._client = new WooCommerce({
+      ...(opts ?? {}),
       wpAPI: true,
       version: 'wc/v3', // v2 has an issue with the item metadata!
       url: urlStr,
@@ -108,12 +114,13 @@ export default class WooClient {
 // we need to use *only* the non-oauth params and re-create the URL from
 // scratch.  Fortunately, linkParser reutrns the querystring parameters in
 // additional to the raw url.
-function paramsFromLink(link: Record<string, string>) {
+function paramsFromLink(link: linkParser.Link) {
+  // function paramsFromLink(link: Record<string, string>) {
   const params = new url.URLSearchParams();
 
   for (const key of Object.keys(link)) {
     if (key !== 'rel' && key !== 'url' && !key.startsWith('oauth_')) {
-      params.append(key, link[key]);
+      params.append(key, link[key]!);
     }
   }
 

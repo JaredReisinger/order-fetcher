@@ -1,11 +1,14 @@
 import util from 'util';
 import fs from 'fs';
 
-import yargs from 'yargs';
+import { ArgumentsCamelCase, CommandBuilder, CommandModule } from 'yargs';
 import moment from 'moment-timezone';
 import chalk from 'chalk';
 import chalkTemplate from 'chalk-template';
-import json2csv from 'json2csv';
+import {
+  Parser as Json2CsvParser,
+  FieldInfo as Json2CsvFieldInfo,
+} from '@json2csv/plainjs';
 import lodashGet from 'lodash.get';
 // import printable from 'printable-characters';
 import table, { ColumnUserConfig } from 'table';
@@ -33,7 +36,7 @@ type DisplayableKey<T> = keyof {
   [P in keyof T as T[P] extends Displayable ? P : never]: T[P];
 };
 
-type AugmentedFieldInfo<T> = Omit<json2csv.FieldInfo<T>, 'label'> & {
+type AugmentedFieldInfo<T> = Omit<Json2CsvFieldInfo<T, unknown>, 'label'> & {
   label: string; // always!
   config?: table.ColumnUserConfig;
   meta: {
@@ -71,6 +74,7 @@ interface Args {
   include?: string[];
   columns?: string;
   out?: string;
+  verifySsl?: boolean;
 }
 
 export default class Get {
@@ -84,7 +88,7 @@ export default class Get {
     this.handleGlobalOpts = handleGlobalOpts;
   }
 
-  async createCommands(): Promise<yargs.CommandModule<Args, Args>[]> {
+  async createCommands(): Promise<CommandModule<Args, Args>[]> {
     // create the base 'get' command, and also a per-host version that makes
     // the command-line easier for the user.
     const cmds = Object.keys(this.hosts).map((host) =>
@@ -115,7 +119,7 @@ export default class Get {
   //              function accepting and returning a yargs instance
   //
   //   handler:   a function which will be passed the parsed argv.
-  async createCommand(host?: string): Promise<yargs.CommandModule<Args, Args>> {
+  async createCommand(host?: string): Promise<CommandModule<Args, Args>> {
     const command = host || 'get';
     // const aliases = '*'; // this is the default command
     const aliases = undefined;
@@ -123,7 +127,7 @@ export default class Get {
       host ? `the ${host}` : 'a'
     } WooCommerce site`;
 
-    const builder: yargs.CommandBuilder<Args, Args> = (yargs) => {
+    const builder: CommandBuilder<Args, Args> = (yargs) => {
       if (!host) {
         yargs.option('host', {
           describe: 'Connect to the given host',
@@ -213,6 +217,10 @@ export default class Get {
             'File to write (CSV format) (cannot be used with "--list-skus")',
           conflicts: ['list-skus', 'list-statuses'],
         })
+        .option('verify-ssl', {
+          describe: 'Whether to verify the SSL certificate from the host',
+          boolean: true,
+        })
         // .group(['after', 'before', 'status'], 'Order Filtering')
         // .group(['sku', 'sku-prefix'], 'Item Filtering')
         // .group(
@@ -286,7 +294,7 @@ Examples:
 
   async run(
     seededHost: string | undefined,
-    argv: yargs.ArgumentsCamelCase<Args>,
+    argv: ArgumentsCamelCase<Args>,
     clientOverride?: WooClient
   ) {
     // REVIEW: if we make a base class for the command, the wrapper and calling
@@ -318,7 +326,10 @@ Examples:
     }
 
     const client =
-      clientOverride ?? new WooClient(host.url, host.key, host.secret);
+      clientOverride ??
+      new WooClient(host.url, host.key, host.secret, {
+        verifySsl: argv.verifySsl,
+      });
 
     // Get orders/items and the currencies in parallel.  We could delay awaiting
     // on the currencies until just before generating the CSV, but the code is a
@@ -423,7 +434,9 @@ Examples:
   }
 
   generateCsv(items: WooItem[], fields: AugmentedFieldInfo<WooItem>[]) {
-    const csv = json2csv.parse(items, { fields, withBOM: true });
+    const parser = new Json2CsvParser({ fields, withBOM: true });
+    const csv = parser.parse(items);
+    // const csv = json2csv.parse(items, { fields, withBOM: true });
     return csv;
   }
 
@@ -525,7 +538,7 @@ Examples:
   getValue(item: WooItem, field: AugmentedFieldInfo<WooItem>) {
     return this.sanitizeString(
       typeof field.value === 'function'
-        ? field.value(item, field as json2csv.FieldValueCallbackInfo) || ''
+        ? field.value(item, field) || ''
         : lodashGet(item, field.value, '')
     );
   }
@@ -658,7 +671,7 @@ Examples:
 }
 
 // REVIEW: should this move to WooClient?
-function createParams(opts: yargs.ArgumentsCamelCase<Args>) {
+function createParams(opts: ArgumentsCamelCase<Args>) {
   const params: Record<string, string> = {
     per_page: '100',
     // per_page: '10',

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import util from 'util';
 
-import yargs from 'yargs';
+import { ArgumentsCamelCase, CommandModule } from 'yargs';
 import chalk from 'chalk';
 import chalkTemplate from 'chalk-template';
 import moment from 'moment-timezone';
@@ -69,13 +69,13 @@ export interface ConfigFile {
   timezone?: string;
 }
 
-export interface OptsHandler {
-  (_: unknown): void;
-}
-
 interface Args {
   host?: string;
   zone?: string;
+}
+
+export interface OptsHandler {
+  (_: ArgumentsCamelCase<Args>): void;
 }
 
 interface MyAnswers {
@@ -98,7 +98,7 @@ export default class Config {
     this.handleGlobalOpts = handleGlobalOpts;
   }
 
-  async createCommands(): Promise<yargs.CommandModule<Args, Args>[]> {
+  async createCommands(): Promise<CommandModule<Args, Args>[]> {
     return [
       {
         command: 'config',
@@ -165,7 +165,7 @@ hosts:${Object.entries(this.cfg.hosts)
 `);
   }
 
-  async init(_: yargs.ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
+  async init(_: ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
     if (!this.cfg._missing) {
       const answers = await (promptOverride ?? inquirer.prompt)([
         {
@@ -206,7 +206,7 @@ hosts:${Object.entries(this.cfg.hosts)
     this.writeConfig(cfg);
   }
 
-  async add(argv: yargs.ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
+  async add(argv: ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
     const { host } = await (promptOverride ?? inquirer.prompt)(
       Config.hostQuestions(argv.host)
     );
@@ -224,7 +224,7 @@ hosts:${Object.entries(this.cfg.hosts)
     this.writeConfig(cfg);
   }
 
-  async remove(argv: yargs.ArgumentsCamelCase<Args>) {
+  async remove(argv: ArgumentsCamelCase<Args>) {
     const { host } = argv;
     if (!host || !this.cfg.hosts[host]) {
       const hosts = `"${Object.keys(this.cfg.hosts).join('", "')}"`;
@@ -238,10 +238,7 @@ hosts:${Object.entries(this.cfg.hosts)
     this.writeConfig(cfg);
   }
 
-  async timezone(
-    argv: yargs.ArgumentsCamelCase<Args>,
-    promptOverride?: PromptFn
-  ) {
+  async timezone(argv: ArgumentsCamelCase<Args>, promptOverride?: PromptFn) {
     const { timezone } = await (promptOverride ?? inquirer.prompt)(
       Config.timezoneQuestions(argv.zone)
     );

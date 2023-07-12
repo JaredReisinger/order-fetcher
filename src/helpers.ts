@@ -19,6 +19,7 @@ export class UserError extends Error {}
 export function setVerbosity(v?: number) {
   verbosity = v || 0;
   dbg(1, `setting verbosity to ${verbosity}`);
+  return verbosity;
 }
 
 // it's lame that String.compare() doesn't exist!
@@ -87,7 +88,12 @@ const objLevels = 2;
 const maxLevels = levelChalkers.length - 1 - objLevels;
 
 // We should *never* just show a bare object, as there's no context!
-export function dbg(level: number, msg: string, obj?: unknown) {
+export function dbg(
+  level: number,
+  msg: string,
+  obj?: unknown,
+  outputter?: typeof console.log
+) {
   if (verbosity < level) {
     return;
   }
@@ -120,13 +126,17 @@ export function dbg(level: number, msg: string, obj?: unknown) {
   // }
 
   // out(msg, level <= 1 ? chalk.gray : chalk.white);
-  out(formattedMsg, chalker);
+  out(formattedMsg, chalker, outputter);
 }
 
-export function err(e: Error | string, chalker?: ChalkInstance) {
+export function err(
+  e: Error | string,
+  chalker?: ChalkInstance,
+  outputter?: typeof console.log
+) {
   let msg = e.toString();
   if (e instanceof Error && e.message) {
     msg = e.message;
   }
-  out(msg, chalker || chalk.red, console.error.bind(console));
+  out(msg, chalker || chalk.red, outputter ?? console.error.bind(console));
 }

@@ -76,7 +76,7 @@ export default class WooOrder {
   static getPaypalFees(wcOrder: Order) {
     for (const m of wcOrder.meta_data || []) {
       if (m.key === 'PayPal Transaction Fee') {
-        return m.value as string;
+        return m.value;
       }
     }
 

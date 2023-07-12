@@ -47,14 +47,20 @@ test('Config.view() should return a Promise', async (t) => {
   const config = createConfig();
   const result = config.view();
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Config.view() should return a Promise (with timezone)', async (t) => {
   const config = createConfig('UTC');
   const result = config.view();
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
+});
+
+test('Config.view() handles a missing config', async (t) => {
+  const config = new Config({ _missing: true, hosts: {} }, () => {});
+  const result = config.view();
+  await t.notThrowsAsync(result);
 });
 
 test('Config.init() should return a Promise', async (t) => {
@@ -66,7 +72,7 @@ test('Config.init() should return a Promise', async (t) => {
   // @ts-ignore -- fake empty args
   const result = config.init({}, prompt);
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 
   // prompt.restore();
 });
@@ -97,7 +103,7 @@ test('Config.init() should write config from answers', async (t) => {
   // @ts-ignore -- fake empty args
   const result = configMissing.init({}, prompt);
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 
   t.deepEqual(write.args[0][0], {
     hosts: {
@@ -132,7 +138,7 @@ test('Config.add() should add a new host', async (t) => {
   // @ts-ignore -- fake empty args
   const result = config.add({}, prompt);
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 
   t.deepEqual(write.args[0][0], {
     timezone: undefined,
@@ -163,12 +169,26 @@ test('Config.remove() should remove a host', async (t) => {
   // @ts-ignore -- fake args... really need to figure out yargs types...
   const result = config.remove({ host: 'foo' });
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 
   t.deepEqual(write.args[0][0], {
     timezone: undefined,
     hosts: {},
   });
+
+  write.restore();
+});
+
+test('Config.remove() without host should fail', async (t) => {
+  const config = createConfig();
+
+  const write = sinon.stub(config, 'writeConfig').resolves();
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore -- fake args... really need to figure out yargs types...
+  const result = config.remove({});
+  t.true(result instanceof Promise);
+  await t.throwsAsync(result);
 
   write.restore();
 });
@@ -185,7 +205,7 @@ test('Config.timezone() should write the timezone', async (t) => {
   // @ts-ignore -- fake args... really need to figure out yargs types...
   const result = config.timezone({}, prompt);
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 
   t.deepEqual(write.args[0][0], {
     hosts: {
