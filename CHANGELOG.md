@@ -1,3 +1,18 @@
+# [3.2.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.1.0...v3.2.0) (2023-07-12)
+
+
+### Bug Fixes
+
+* **json2csv:** update from `json2csv` to `@json2csv/plainjs` ([6d2c3b1](https://github.com/JaredReisinger/order-fetcher/commit/6d2c3b1a25c0e36d4dc2436aa6ca3aaf2dbcd8c6))
+* small yargs import tweak ([ec46368](https://github.com/JaredReisinger/order-fetcher/commit/ec46368bb28ef79e2b840ae044e35d7b6692c7db))
+* **snyk:** switch from `snyk protect` to @snyk/protect's `snyk-protect` ([66775c2](https://github.com/JaredReisinger/order-fetcher/commit/66775c2bebc4e0f8a9ae126854e0aaffa329b04c))
+
+
+### Features
+
+* add `--verify-ssl` and `--no-verify-ssl` CLI opts ([6edd789](https://github.com/JaredReisinger/order-fetcher/commit/6edd78939688beff2fb9df7e305514c9f9b22a0e))
+* **dependencies:** update all dependencies ([0bdff03](https://github.com/JaredReisinger/order-fetcher/commit/0bdff03b7035579bb50835cdc6a413f4aa6a5fe2))
+
 # [3.1.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.0.3...v3.1.0) (2022-09-08)
 
 
