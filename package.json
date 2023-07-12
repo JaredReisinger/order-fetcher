@@ -36,6 +36,7 @@
     "prepare": "(is-ci || husky install) && npm run snyk-protect"
   },
   "dependencies": {
+    "@json2csv/plainjs": "^7.0.1",
     "@snyk/protect": "^1.1187.0",
     "chalk": "^5.3.0",
     "chalk-template": "^1.1.0",
@@ -43,7 +44,6 @@
     "inquirer": "^9.2.7",
     "inquirer-autocomplete": "^0.12.2",
     "inquirer-autocomplete-prompt": "^3.0.0",
-    "json2csv": "^6.0.0-alpha.2",
     "lodash.get": "^4.4.2",
     "moment-timezone": "^0.5.43",
     "parse-link-header": "^2.0.0",
@@ -63,7 +63,6 @@
     "@types/he": "^1.2.0",
     "@types/inquirer": "^9.0.3",
     "@types/inquirer-autocomplete-prompt": "^3.0.0",
-    "@types/json2csv": "^5.0.3",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "^20.4.1",
     "@types/parse-link-header": "^2.0.1",

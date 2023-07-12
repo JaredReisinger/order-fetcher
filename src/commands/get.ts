@@ -5,7 +5,10 @@ import { ArgumentsCamelCase, CommandBuilder, CommandModule } from 'yargs';
 import moment from 'moment-timezone';
 import chalk from 'chalk';
 import chalkTemplate from 'chalk-template';
-import json2csv from 'json2csv';
+import {
+  Parser as Json2CsvParser,
+  FieldInfo as Json2CsvFieldInfo,
+} from '@json2csv/plainjs';
 import lodashGet from 'lodash.get';
 // import printable from 'printable-characters';
 import table, { ColumnUserConfig } from 'table';
@@ -33,7 +36,7 @@ type DisplayableKey<T> = keyof {
   [P in keyof T as T[P] extends Displayable ? P : never]: T[P];
 };
 
-type AugmentedFieldInfo<T> = Omit<json2csv.FieldInfo<T>, 'label'> & {
+type AugmentedFieldInfo<T> = Omit<Json2CsvFieldInfo<T, unknown>, 'label'> & {
   label: string; // always!
   config?: table.ColumnUserConfig;
   meta: {
@@ -431,7 +434,9 @@ Examples:
   }
 
   generateCsv(items: WooItem[], fields: AugmentedFieldInfo<WooItem>[]) {
-    const csv = json2csv.parse(items, { fields, withBOM: true });
+    const parser = new Json2CsvParser({ fields, withBOM: true });
+    const csv = parser.parse(items);
+    // const csv = json2csv.parse(items, { fields, withBOM: true });
     return csv;
   }
 
@@ -533,7 +538,7 @@ Examples:
   getValue(item: WooItem, field: AugmentedFieldInfo<WooItem>) {
     return this.sanitizeString(
       typeof field.value === 'function'
-        ? field.value(item, field as json2csv.FieldValueCallbackInfo) || ''
+        ? field.value(item, field) || ''
         : lodashGet(item, field.value, '')
     );
   }

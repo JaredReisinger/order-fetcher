@@ -1,6 +1,6 @@
 import test from 'ava';
 import sinon from 'sinon';
-import { FieldValueCallback } from 'json2csv';
+import { FieldValueGetterFnWithField } from '@json2csv/plainjs';
 import yargs from 'yargs/yargs';
 import moment from 'moment-timezone';
 
@@ -169,7 +169,10 @@ test('Get.getValue() should handle extractor functions', (t) => {
   t.is(
     get.getValue({ field: 'FIELD' } as unknown as WooItem, {
       value: (({ field }: { field: string }) =>
-        `FN(${field})`) as unknown as FieldValueCallback<WooItem>,
+        `FN(${field})`) as unknown as FieldValueGetterFnWithField<
+        WooItem,
+        unknown
+      >,
       label: '',
       meta,
     }),
