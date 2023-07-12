@@ -1,7 +1,15 @@
 import test from 'ava';
-
+import chalk from 'chalk';
 // import 'chai/register-should';
 import * as helpers from './helpers.js';
+
+test('setVerbosity() should return the verbosity set', (t) => {
+  t.is(helpers.setVerbosity(), 0);
+  t.is(helpers.setVerbosity(0), 0);
+  t.is(helpers.setVerbosity(1), 1);
+  t.is(helpers.setVerbosity(2), 2);
+  t.is(helpers.setVerbosity(), 0);
+});
 
 test('stringCompare() should compare strings', (t) => {
   t.is(helpers.stringCompare('a', 'b'), -1);
@@ -36,4 +44,41 @@ test('asMoment() should throw on an invalid date', (t) => {
   t.throws(() => helpers.asMoment('BOGUS', 'UTC'), {
     instanceOf: helpers.UserError,
   });
+});
+
+const MSG = 'SIMPLE MESSAGE';
+
+test('out() calls the outputter with message', (t) => {
+  const outputter = (msg: string) => {
+    t.is(msg, MSG);
+  };
+  helpers.out(MSG, undefined, outputter);
+});
+
+test('dbg() should show a simple message', (t) => {
+  const outputter = (msg: string) => {
+    t.is(msg, chalk.cyan(MSG));
+  };
+  helpers.dbg(0, MSG, undefined, outputter);
+});
+
+test('dbg() can show an object as well', (t) => {
+  const outputter = (msg: string) => {
+    t.is(msg, chalk.cyan(`${MSG}:\n${chalk.gray(`{ KEY: 'VALUE' }`)}`));
+  };
+  helpers.dbg(0, MSG, { KEY: 'VALUE' }, outputter);
+});
+
+test('dbg() with array shows length', (t) => {
+  const outputter = (msg: string) => {
+    t.is(msg, chalk.cyan(`${MSG} (2):\n${chalk.gray(`[ 'A', 'B' ]`)}`));
+  };
+  helpers.dbg(0, MSG, ['A', 'B'], outputter);
+});
+
+test('err() should show a simple message', (t) => {
+  const outputter = (msg: string) => {
+    t.is(msg, chalk.red(MSG));
+  };
+  helpers.err(new Error(MSG), undefined, outputter);
 });

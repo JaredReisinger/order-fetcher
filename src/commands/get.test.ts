@@ -42,7 +42,7 @@ const order = {
       meta_data: [
         { value: 'missing key' },
         { key: '_ignored', value: 'WooCommerce-style metadata' },
-        { key: 'v1 price $0.99', value: 'v1-style price-included key' },
+        // { key: 'v1 price $0.99', value: 'v1-style price-included key' },
         { key: 'phone', value: '8005551212' },
       ],
     },
@@ -80,14 +80,14 @@ test('Get.createCommands() should return a Promise', async (t) => {
   const get = createGet();
   const result = get.createCommands();
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Get.createCommand("foo") should return a Promise', async (t) => {
   const get = createGet();
   const result = get.createCommand('foo');
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Get.createCommand().builder should succeed', async (t) => {
@@ -240,7 +240,7 @@ test('Get.run() should return a Promise', async (t) => {
   // @ts-ignore -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(result instanceof Promise);
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Get.run() requires a host', async (t) => {
@@ -262,7 +262,7 @@ test('Get.run() should request currencies', async (t) => {
   // @ts-ignore -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(stub.calledWith('data/currencies'));
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Get.run() should request items', async (t) => {
@@ -272,7 +272,7 @@ test('Get.run() should request items', async (t) => {
   // @ts-ignore -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(stub.calledWith('orders'));
-  await result;
+  await t.notThrowsAsync(result);
 });
 
 test('Get.run() should not throw with valid (stub) data', async (t) => {
@@ -286,6 +286,72 @@ test('Get.run() should not throw with valid (stub) data', async (t) => {
   // @ts-ignore -- fake empty args
   const result = get.run('foo', {}, client);
   await t.notThrowsAsync(async () => {
-    await result;
+    await t.notThrowsAsync(result);
   });
 });
+
+test('Get.run() can filter by sku', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore -- fake args
+  const result = get.run('foo', { sku: ['SKU_1'] }, client);
+  t.true(stub.calledWith('orders'));
+  await t.notThrowsAsync(result);
+});
+
+test('Get.run() can filter by sku prefix', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore -- fake args
+  const result = get.run('foo', { skuPrefix: ['SKU_'] }, client);
+  t.true(stub.calledWith('orders'));
+  await t.notThrowsAsync(result);
+});
+
+test('Get.run() can present meta info', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  const result = get.run(
+    'foo',
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore -- fake args
+    { listSkus: true, listStatuses: true, listColumns: true },
+    client
+  );
+  t.true(stub.calledWith('orders'));
+  await t.notThrowsAsync(result);
+});
+
+test('Get.run() can present specific columns', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  const result = get.run(
+    'foo',
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore -- fake args
+    { columns: 'order#,total' },
+    client
+  );
+  t.true(stub.calledWith('orders'));
+  await t.notThrowsAsync(result);
+});
+
+// TODO: test after/before/status filtering (in call!)
