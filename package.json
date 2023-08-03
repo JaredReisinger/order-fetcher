@@ -64,7 +64,7 @@
     "@types/inquirer": "^9.0.3",
     "@types/inquirer-autocomplete-prompt": "^3.0.0",
     "@types/lodash.get": "^4.4.7",
-    "@types/node": "^20.4.1",
+    "@types/node": "^20.4.2",
     "@types/parse-link-header": "^2.0.1",
     "@types/sinon": "^10.0.15",
     "@types/yargs": "^17.0.24",
