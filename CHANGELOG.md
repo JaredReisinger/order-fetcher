@@ -1,3 +1,17 @@
+# [4.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.2.0...v4.0.0) (2024-05-09)
+
+
+### Bug Fixes
+
+* **audit:** npm audit fix ([823f360](https://github.com/JaredReisinger/order-fetcher/commit/823f360546850fb5a924ffa35e02663e90056cdb))
+* **dependencies:** update dependencies, *except* eslint ([2c95ef9](https://github.com/JaredReisinger/order-fetcher/commit/2c95ef91d94c80d10ad63cd02783435652a08cc6))
+* require node v20, fix module/resolution for tests ([f605f4b](https://github.com/JaredReisinger/order-fetcher/commit/f605f4b42d2f53332e62a687b7efab3994872837))
+
+
+### BREAKING CHANGES
+
+* **dependencies:** node version requirement update
+
 # [3.2.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.1.0...v3.2.0) (2023-07-12)
 
 
