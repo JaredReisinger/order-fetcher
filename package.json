@@ -36,7 +36,7 @@
     "codecov": "codecov",
     "release": "semantic-release",
     "snyk-protect": "snyk-protect",
-    "prepare": "husky"
+    "prepare": "is-ci || husky"
   },
   "dependencies": {
     "@json2csv/plainjs": "^7.0.6",
