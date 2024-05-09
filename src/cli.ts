@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import yargsFn, { ArgumentsCamelCase, Argv, CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { readPackageUp } from 'read-pkg-up';
+import { readPackageUp } from 'read-package-up';
 
 import * as commands from './commands/index.js';
 import { dbg, err, setVerbosity, UserError } from './helpers.js';
