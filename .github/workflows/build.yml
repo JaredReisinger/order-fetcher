@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 16
           - 18
+          - 20
 
     # okay... so it's super helpful to not need to re-acquire/re-build, which
     # means putting *everything* into one job.  We just need to be judicious
@@ -59,7 +59,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - uses: actions/cache@v3
         with:
