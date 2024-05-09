@@ -1,11 +1,12 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": "@tsconfig/node20/tsconfig.json",
 
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
     "typeRoots": ["./@types", "./node_modules/@types"],
-    "module": "es2022",
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
     "sourceMap": true
   }
 }
