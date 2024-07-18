@@ -6,6 +6,7 @@ import chalk from 'chalk';
 import chalkTemplate from 'chalk-template';
 import moment from 'moment-timezone';
 import { confirm, input, select } from '@inquirer/prompts';
+import { Context } from '@inquirer/type';
 
 import * as helpers from '../helpers.js';
 
@@ -25,7 +26,7 @@ export interface ConfigFile {
   timezone?: string;
 }
 
-interface Args {
+export interface Args {
   host?: string;
   zone?: string;
 }
@@ -108,12 +109,15 @@ hosts:${Object.entries(this.cfg.hosts)
 `);
   }
 
-  async init() {
+  async init(argv?: ArgumentsCamelCase<Args>, context?: Context) {
     if (!this.cfg._missing) {
-      const overwrite = await confirm({
-        message: 'Do you want to overwrite the existing configuration?',
-        default: false,
-      });
+      const overwrite = await confirm(
+        {
+          message: 'Do you want to overwrite the existing configuration?',
+          default: false,
+        },
+        context
+      );
 
       if (!overwrite) {
         // bail now!
@@ -125,8 +129,8 @@ hosts:${Object.entries(this.cfg.hosts)
       }
     }
 
-    const host = await Config.hostQuestions();
-    const timezone = await Config.timezoneQuestions();
+    const host = await Config.hostQuestions(undefined, context);
+    const timezone = await Config.timezoneQuestions(undefined, context);
 
     const { name, url, key, secret } = host;
     const cfg = {
@@ -139,8 +143,8 @@ hosts:${Object.entries(this.cfg.hosts)
     this.writeConfig(cfg);
   }
 
-  async add(argv: ArgumentsCamelCase<Args>) {
-    const host = await Config.hostQuestions(argv.host);
+  async add(argv?: ArgumentsCamelCase<Args>, context?: Context) {
+    const host = await Config.hostQuestions(argv?.host, context);
     // console.dir({ argv, host });
     const { name, url, key, secret } = host;
 
@@ -171,8 +175,8 @@ hosts:${Object.entries(this.cfg.hosts)
     this.writeConfig(cfg);
   }
 
-  async timezone(argv: ArgumentsCamelCase<Args>) {
-    const timezone = await Config.timezoneQuestions(argv.zone);
+  async timezone(argv?: ArgumentsCamelCase<Args>, context?: Context) {
+    const timezone = await Config.timezoneQuestions(argv?.zone, context);
 
     const cfg = {
       ...this.cfg,
@@ -197,44 +201,59 @@ hosts:${Object.entries(this.cfg.hosts)
     await writeFileAsync(cfg._filename, formatted, 'utf8');
   }
 
-  static async hostQuestions(hostName?: string) {
+  static async hostQuestions(hostName?: string, context?: Context) {
     let name = hostName;
     if (!name) {
-      name = await input({
-        message: 'What is the nickname for your WooCommerce site?',
-        default: name,
-        // required: true,
-        validate: (name: string) =>
-          name && name.length > 0
-            ? true
-            : 'Please provide a name, it will be used as a convenient subcommand.',
-      });
+      name = await input(
+        {
+          message: 'What is the nickname for your WooCommerce site?',
+          default: name,
+          required: true,
+          // validate: (name: string) =>
+          //   name && name.length > 0
+          //     ? true
+          //     : 'Please provide a name, it will be used as a convenient subcommand.',
+        },
+        context
+      );
     }
 
-    const secure = await confirm({
-      message: `Is the site for ${name} secure (uses https)?`,
-      default: true,
-    });
-
-    const url = await input({
-      message: `What is the URL for ${name}?`,
-      transformer: (input /*, { isFinal }*/) => {
-        return `http${secure ? 's' : ''}://${input || `${name}.com`}`;
+    const secure = await confirm(
+      {
+        message: `Is the site for ${name} secure (uses https)?`,
+        default: true,
       },
-    });
+      context
+    );
 
-    const key = await input({
-      message: `What is the WooCommerce key for ${name}?\n(Visit ${chalk.blue(
-        `${url}/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
-      )} to create a key, only Read permission is needed.)\n?`,
-      // required: true,
-      validate: required('the WooCommerce key'),
-    });
+    const url = await input(
+      {
+        message: `What is the URL for ${name}?`,
+        transformer: (input /*, { isFinal }*/) => {
+          return `http${secure ? 's' : ''}://${input || `${name}.com`}`;
+        },
+      },
+      context
+    );
 
-    const secret = await input({
-      message: `What is the WooCommerce secret for ${name}?`,
-      validate: required('the WooCommerce secret'),
-    });
+    const key = await input(
+      {
+        message: `What is the WooCommerce key for ${name}?\n(Visit ${chalk.blue(
+          `${url}/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
+        )} to create a key, only Read permission is needed.)\n?`,
+        // required: true,
+        validate: required('the WooCommerce key'),
+      },
+      context
+    );
+
+    const secret = await input(
+      {
+        message: `What is the WooCommerce secret for ${name}?`,
+        validate: required('the WooCommerce secret'),
+      },
+      context
+    );
 
     return {
       name,
@@ -245,7 +264,7 @@ hosts:${Object.entries(this.cfg.hosts)
     };
   }
 
-  static async timezoneQuestions(zone?: string) {
+  static async timezoneQuestions(zone?: string, context?: Context) {
     // TODO: switch to Luxon?
     const allTimezones = moment.tz.names();
     const guessTimezone = moment.tz.guess();
@@ -263,11 +282,14 @@ hosts:${Object.entries(this.cfg.hosts)
     } else if (filtered?.length === 1) {
       timezone = filtered[0];
     } else {
-      timezone = await select({
-        message: 'What timezone do you want to use?',
-        choices: allTimezones.map((tz) => ({ value: tz })),
-        default: zone || guessTimezone,
-      });
+      timezone = await select(
+        {
+          message: 'What timezone do you want to use?',
+          choices: allTimezones.map((tz) => ({ value: tz })),
+          default: zone || guessTimezone,
+        },
+        context
+      );
     }
 
     return timezone;
