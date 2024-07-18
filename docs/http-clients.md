@@ -1,0 +1,19 @@
+# HTTP Clients
+
+The early implementation of this tool leveraged the `woocommerce-api` package to manage the HTTP REST calls to the server. This package is very old (no changes in 5 years), and also ridiculously large, clocking in at 13.9MB when installed. So, I went looking for something smaller and newer (these are all "official" clients):
+
+| name                                                                                                 | last publish (age)                     |                                                             installed size (kB) | notes                         |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------: | ----------------------------- |
+| [woocommerce-api](https://www.npmjs.com/package/woocommerce-api)                                     | 2019-07-29 (5 years)                   |                    [14,234](https://packagephobia.com/result?p=woocommerce-api) | archived at last publish      |
+| [@woocommerce/woocommerce-rest-api](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) | 2019-08-02 (5 years, no longer exists) | [846](https://packagephobia.com/result?p=%40woocommerce%2Fwoocommerce-rest-api) | GitHub repo no longer exists! |
+| [@woocommerce/api](https://www.npmjs.com/package/@woocommerce/api)                                   | 2021-05-18 (3 years)                   |                [1,044](https://packagephobia.com/result?p=%40woocommerce%2Fapi) | still version 0.2.0           |
+
+The newest, `@woocommerce/api`, does offer Typescript types, and an interesting "repository" system that nominally improves the "getting a bunch of one kind of data" experience, but it still has issues. The "improved" experience hides the response headers, so there's no "next" link for paginated data. I would manage that myself, but the "transformer" hooks that create objects based on the raw data are hidden within the library an not exposed. The end result of this is that I'd get almost no value out of it at all.
+
+Since I want/need to manage pagination myself, and since the only other benefit of these libraries is (a) to encapsulate the API path (`/wp-json/wc/v3`) and (b) add authorization (which isn't that complex), I've decided to just build my own on top of [`ky`](https://www.npmjs.com/package/ky), which only adds [147kB](https://packagephobia.com/result?p=ky) when installed. (Dropping `order-fetcher` from 29.4MB to around 15.6MB, about half the previous size and removing a ton of obsolete dependencies.)
+
+## A note about pagination
+
+The WordPress REST API pagination does not offer transactional pagination, or a "cursor" model to ensure accurate and reliable traversal of the requested items. It uses a "page"-based model, which can result in small discrepancies if there is a change in the underlying data while the pages are being requested.
+
+In particular, imagine a request for an endpoint with 150 items, where a new item gets added after the first request and before the second. The WordPress REST API has a hard-limit of 100 items per page, so retrieving all of the items will _always_ require at least two requests. If the new item sorts to the end of the list, the second request will return 51 items (the original 50 plus the new one), and all is well. If the new items sorts to the beginning, however, all of the item positions will shift "down" in between the first and second calls, and the second request will actually retrieve the last item from the first call again as the first item in the new set, and the new item will be missed entirely. The missed item could be considered a race condition, and isn't a big deal... but the duplicated item _is_ a problem, and needs to be detected and skipped.

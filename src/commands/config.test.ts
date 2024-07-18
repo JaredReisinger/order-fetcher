@@ -245,7 +245,7 @@ test('Config.init() should write config from answers', async (t) => {
   await events.wait();
 
   t.is(getScreen(), '? What is the URL for NAME? https://NAME.com');
-  events.type('https://NAME.com');
+  // events.type('https://NAME.com');
   events.keypress('enter');
   await events.wait();
 
@@ -303,7 +303,7 @@ test('Config.add() should add a new host', async (t) => {
   await events.wait();
 
   t.is(getScreen(), '? What is the URL for NAME? https://NAME.com');
-  events.type('https://NAME.com');
+  // events.type('https://NAME.com');
   events.keypress('enter');
   await events.wait();
 

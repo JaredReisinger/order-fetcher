@@ -1,6 +1,8 @@
 import he from 'he';
-import { Currency } from 'woocommerce-api';
+
 import { dbg } from '../helpers.js';
+
+import { Currency } from './woocommerce-types.js';
 
 interface WooCurrency {
   name: string;

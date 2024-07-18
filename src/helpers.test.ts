@@ -1,6 +1,7 @@
 import test from 'ava';
 import chalk from 'chalk';
-// import 'chai/register-should';
+import sinon from 'sinon';
+
 import * as helpers from './helpers.js';
 
 test('setVerbosity() should return the verbosity set', (t) => {
@@ -40,6 +41,11 @@ test('asMoment() should parse a valid date', (t) => {
   t.true(date.isValid());
 });
 
+test('asMoment() should parse without a timezone', (t) => {
+  const date = helpers.asMoment('2019-01-01', '');
+  t.true(date.isValid());
+});
+
 test('asMoment() should throw on an invalid date', (t) => {
   t.throws(() => helpers.asMoment('BOGUS', 'UTC'), {
     instanceOf: helpers.UserError,
@@ -60,6 +66,21 @@ test('dbg() should show a simple message', (t) => {
     t.is(msg, chalk.cyan(MSG));
   };
   helpers.dbg(0, MSG, undefined, outputter);
+});
+
+test('dbg() does not show a level above current verbosity', (t) => {
+  const outputter = sinon.stub();
+  helpers.dbg(1, MSG, undefined, outputter);
+  t.true(outputter.notCalled);
+});
+
+test('dbg() handles a ridiculous level', (t) => {
+  const levelPrev = helpers.setVerbosity(999);
+  const outputter = (msg: string) => {
+    t.is(msg, chalk.gray(MSG));
+  };
+  helpers.dbg(999, MSG, undefined, outputter);
+  helpers.setVerbosity(levelPrev);
 });
 
 test('dbg() can show an object as well', (t) => {

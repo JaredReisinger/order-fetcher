@@ -1,6 +1,7 @@
 import test from 'ava';
 // import sinon from 'sinon';
-import { Order } from 'woocommerce-api';
+
+import { Order } from './woocommerce-types.js';
 import WooItem from './WooItem.js';
 
 const order = {

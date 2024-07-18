@@ -1,38 +1,62 @@
-import path from 'path';
-import util from 'util';
-import fs from 'fs';
-import chalk from 'chalk';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import util from 'node:util';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
+import chalk from 'chalk';
+import { readPackageUp } from 'read-package-up';
 import yargsFn, { ArgumentsCamelCase, Argv, CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { readPackageUp } from 'read-package-up';
-
 import * as commands from './commands/index.js';
-import { dbg, err, setVerbosity, UserError } from './helpers.js';
 import { ConfigFile } from './commands/config.js';
+
+import { dbg, err, setVerbosity, UserError } from './helpers.js';
 
 const readFileAsync = util.promisify(fs.readFile);
 
-interface Args {
+export interface Args {
   verbose?: number;
 }
 
-// You can't use 'await' outside of an 'async' function... so you have to use
-// .then()/.catch() at the top level.
-main().catch((e) => {
-  err(e);
-  if (!(e instanceof UserError) && e.stack) {
-    err(e.stack, chalk.white);
-  }
-  process.exit(1);
-});
+export { type Argv };
 
-async function main() {
+// See
+// https://exploringjs.com/nodejs-shell-scripting/ch_nodejs-path.html#detecting-if-module-is-main
+// for the logic behind this check...
+if (
+  import.meta.url.startsWith('file:') &&
+  process.argv[1] === fileURLToPath(import.meta.url)
+) {
+  try {
+    await main();
+  } catch (e) {
+    if (e instanceof Error || typeof e === 'string') {
+      err(e);
+    } else {
+      err(`unexpected error: ${typeof e}`);
+    }
+
+    if (
+      !(e instanceof UserError) &&
+      typeof e === 'object' &&
+      e &&
+      'stack' in e
+    ) {
+      err(String(e.stack), chalk.white);
+    }
+
+    process.exit(1);
+  }
+}
+
+export default async function main(yargsHook?: (yargs: Argv<Args>) => void) {
   const cfg = await loadConfig();
 
   const yargs = yargsFn(hideBin(process.argv)) as Argv<Args>;
+  if (yargsHook) {
+    yargsHook(yargs);
+  }
 
   // options used in common for most commands...
   yargs

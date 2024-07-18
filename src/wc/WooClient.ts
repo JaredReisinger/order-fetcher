@@ -1,9 +1,15 @@
-import url from 'url'; // import { URL, URLSearchParams } doesn't work!
-import WooCommerce from 'woocommerce-api';
+import url from 'node:url'; // import { URL, URLSearchParams } doesn't work!
+
+import ky, { KyInstance } from 'ky';
 import linkParser from 'parse-link-header';
 
 // import chalk from 'chalk';
 import { dbg } from '../helpers.js';
+
+// // New @woocommerce/api doesn't expose indirect types... so we have to manage that!
+// type WooHTTPClient = ReturnType<
+//   ReturnType<(typeof WooHTTPClientFactory)['build']>['create']
+// >;
 
 // // This type may depend on the call, and thus need to be passed in?
 // export interface Data {
@@ -21,23 +27,54 @@ type KeyProps<T> = keyof {
 
 // WooClient wraps the WooCommerce-API helper because it has some rough edges.
 export default class WooClient {
-  _client: WooCommerce;
+  // _client: WooCommerce;
+  // _client2: WooHTTPClient;
+  _ky: KyInstance;
+  _apiVersion: string;
 
   constructor(
     urlStr: string,
     key: string,
-    secret: string,
-    opts?: Partial<ConstructorParameters<typeof WooCommerce>[0]>
+    secret: string
+    // opts?: Partial<ConstructorParameters<typeof WooCommerce>[0]>
   ) {
-    this._client = new WooCommerce({
-      ...(opts ?? {}),
-      wpAPI: true,
-      version: 'wc/v3', // v2 has an issue with the item metadata!
-      url: urlStr,
-      consumerKey: key,
-      consumerSecret: secret,
+    this._apiVersion = 'wc/v3';
+
+    const credentials = Buffer.from(`${key}:${secret}`).toString('base64');
+
+    // using Basic auth only works on secure (HTTPS) connections
+    this._ky = ky.create({
+      prefixUrl: `${urlStr}/wp-json/wc/v3/`,
+      headers: {
+        Authorization: `Basic ${credentials}`,
+      },
     });
+
+    // this._client2 = WooHTTPClientFactory.build(urlStr)
+    //   .withIndexPermalinks()
+    //   .withOAuth(key, secret)
+    //   .create();
+
+    // // TODO: remove old client... what about other options?
+    // this._client = new WooCommerce({
+    //   ...(opts ?? {}),
+    //   wpAPI: true,
+    //   version: 'wc/v3', // v2 has an issue with the item metadata!
+    //   url: urlStr,
+    //   consumerKey: key,
+    //   consumerSecret: secret,
+    // });
   }
+
+  // xxx() {
+  //   return this._client2;
+  // }
+
+  // The new @woocommerce/api REST repositories aren't good at
+  // more-than-one-page requests.. they drop the header (with the 'link'), and
+  // don't know about de-duping.  Since we *only* need to 'get', we build our
+  // own using the transformer (for type-safety).... but that's not exposed, so
+  // we have to keep our own normalization logic from before.
 
   // getAll() calls the endpoint as many times as needed to retrieve all of
   // the data, using the 'Link' header to fetch the 'next' page until there
@@ -60,14 +97,24 @@ export default class WooClient {
 
     while (fetchPage) {
       fetchPage = false; // until proven otherwise
-      const uri = `${endpoint}?${params.toString()}`;
-      dbg(3, `fetching page ${page}...`, { endpoint, params, uri });
+      // const uri = `${endpoint}?${params.toString()}`;
+      dbg(3, `fetching page ${page}...`, { endpoint, params /*, uri*/ });
 
-      const response = await this._client.getAsync(uri);
+      // const response = await this._client.getAsync(uri);
+      // const response = await this._client2.get<T[]>(
+      //   `${this._apiVersion}/${endpoint}`,
+      //   params
+      // );
 
-      dbg(4, 'raw body', response.body);
-      // We need to pass the body type in?
-      const body = JSON.parse(response.body) as T[] | { code: unknown };
+      const response = await this._ky.get(endpoint, {
+        searchParams: params,
+      });
+
+      // dbg(4, 'raw body', response.body);
+      // // We need to pass the body type in?
+      // const body = JSON.parse(response.body) as T[] | { code: unknown };
+      // const body = response.data;
+      const body = await response.json<T[] | { code: unknown }>();
       dbg(4, 'parsed body', body);
       if ('code' in body) {
         throw body;
@@ -90,17 +137,20 @@ export default class WooClient {
         keys[key] = true;
         data.push(d);
       });
-      // data = data.concat(body);
+
       dbg(
         1,
         `got page ${page}, ${body.length} ${endpoint} (${duplicates} duplicates), now have ${data.length} ${endpoint}`
       );
 
-      const links = linkParser(response.headers.link);
-      if (links && links.next) {
-        params = paramsFromLink(links.next);
-        fetchPage = true;
-        page++;
+      dbg(3, 'link header?', response.headers);
+      if (response.headers.has('link')) {
+        const links = linkParser(response.headers.get('link'));
+        if (links && links.next) {
+          params = paramsFromLink(links.next);
+          fetchPage = true;
+          page++;
+        }
       }
     }
 

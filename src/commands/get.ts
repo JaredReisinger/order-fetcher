@@ -13,13 +13,12 @@ import lodashGet from 'lodash.get';
 // import printable from 'printable-characters';
 import table, { ColumnUserConfig } from 'table';
 
-import { Order, Currency } from 'woocommerce-api';
-
-import * as helpers from '../helpers.js';
+import { Order, Currency } from '../wc/woocommerce-types.js';
 import WooClient from '../wc/WooClient.js';
 import WooCurrencies from '../wc/WooCurrencies.js';
 import WooItem from '../wc/WooItem.js';
 
+import * as helpers from '../helpers.js';
 import { ConfigFile, OptsHandler } from './config.js';
 
 const writeFileAsync = util.promisify(fs.writeFile);
@@ -74,7 +73,7 @@ interface Args {
   include?: string[];
   columns?: string;
   out?: string;
-  verifySsl?: boolean;
+  // verifySsl?: boolean;
 }
 
 export default class Get {
@@ -217,10 +216,10 @@ export default class Get {
             'File to write (CSV format) (cannot be used with "--list-skus")',
           conflicts: ['list-skus', 'list-statuses'],
         })
-        .option('verify-ssl', {
-          describe: 'Whether to verify the SSL certificate from the host',
-          boolean: true,
-        })
+        // .option('verify-ssl', {
+        //   describe: 'Whether to verify the SSL certificate from the host',
+        //   boolean: true,
+        // })
         // .group(['after', 'before', 'status'], 'Order Filtering')
         // .group(['sku', 'sku-prefix'], 'Item Filtering')
         // .group(
@@ -327,9 +326,15 @@ Examples:
 
     const client =
       clientOverride ??
-      new WooClient(host.url, host.key, host.secret, {
+      new WooClient(
+        host.url,
+        host.key,
+        host.secret /*, {
         verifySsl: argv.verifySsl,
-      });
+      }*/
+      );
+
+    // new order stuff...
 
     // Get orders/items and the currencies in parallel.  We could delay awaiting
     // on the currencies until just before generating the CSV, but the code is a

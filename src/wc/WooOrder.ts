@@ -1,9 +1,9 @@
 import moment from 'moment-timezone';
 
-import type { Billing, Order } from 'woocommerce-api';
-
-import * as wcutils from './wcutils.js';
 import { dbg } from '../helpers.js';
+
+import type { Billing, Order } from './woocommerce-types.js';
+import * as wcutils from './wcutils.js';
 
 export interface SimplifiedBilling {
   name: string;

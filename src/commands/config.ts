@@ -12,6 +12,10 @@ import * as helpers from '../helpers.js';
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
+// extract types from @inquirer/prompts..
+type InputConfig = Parameters<typeof input>[0];
+type InputTransformer = Required<InputConfig>['transformer'];
+
 // Need a type for our config...
 interface ConfigHostInfo {
   url: string;
@@ -46,14 +50,25 @@ export default class Config {
     return [
       {
         command: 'config',
-        describe: 'help manage the .order-fetcher.json configuration',
+        describe: 'Helps manage the .order-fetcher.json configuration',
 
-        handler: () => {
-          helpers.dbg(1, 'dummy handler to keep typescript happy?');
-        },
+        // dummy handler to keep Typescript happy
+        handler: undefined as unknown as (
+          args: ArgumentsCamelCase<Args>
+        ) => void | Promise<void>,
 
         builder: (yargs) =>
           yargs
+            // config without a subcommand shows the help
+            .command(
+              '*',
+              false,
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              () => {},
+              () => {
+                yargs.showHelp();
+              }
+            )
             .command({
               command: 'view',
               describe: 'view the current configuration',
@@ -227,15 +242,19 @@ hosts:${Object.entries(this.cfg.hosts)
       context
     );
 
-    const url = await input(
+    const urlTransformer: InputTransformer = (input /*, { isFinal }*/) => {
+      return `http${secure ? 's' : ''}://${input || `${name}.com`}`;
+    };
+
+    let url = await input(
       {
         message: `What is the URL for ${name}?`,
-        transformer: (input /*, { isFinal }*/) => {
-          return `http${secure ? 's' : ''}://${input || `${name}.com`}`;
-        },
+        transformer: urlTransformer,
       },
       context
     );
+
+    url = urlTransformer(url, { isFinal: true });
 
     const key = await input(
       {

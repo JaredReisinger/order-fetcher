@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 18
           - 20
+          - 22
 
     # okay... so it's super helpful to not need to re-acquire/re-build, which
     # means putting *everything* into one job.  We just need to be judicious

@@ -1,5 +1,6 @@
 node_modules/
 _output/
+.tsimp/
 dist/
 coverage/
 public/generated/

@@ -1,4 +1,4 @@
-import type { LineItem, Order } from 'woocommerce-api';
+import type { LineItem, Order } from './woocommerce-types.js';
 
 import WooOrder from './WooOrder.js';
 import * as wcutils from './wcutils.js';
