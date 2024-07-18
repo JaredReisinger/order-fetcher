@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.1...v4.0.2) (2024-07-18)
+
+
+### Bug Fixes
+
+* **config:** properly set filename when running `config init` ([d90c8f6](https://github.com/JaredReisinger/order-fetcher/commit/d90c8f611630c1489bc38bdd7c9c85da5435af91))
+
 ## [4.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.0...v4.0.1) (2024-07-18)
 
 
