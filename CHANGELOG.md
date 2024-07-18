@@ -1,3 +1,11 @@
+## [4.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.0...v4.0.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* **dependencies:** update all dependencies ([007ef11](https://github.com/JaredReisinger/order-fetcher/commit/007ef11ba915e0cc20327eda97491322ff9d9dd2))
+* **dependencies:** update dependencies ([11abc25](https://github.com/JaredReisinger/order-fetcher/commit/11abc25551c2f6ea8a9674412e4bd34983385100))
+
 # [4.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v3.2.0...v4.0.0) (2024-05-09)
 
 
