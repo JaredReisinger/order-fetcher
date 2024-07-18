@@ -9,9 +9,7 @@ import { dbg } from '../helpers.js';
 export const isPhoneRE = /phone|fax/i;
 export const hasPriceRE = / \(\$\d+.\d\d\)$/;
 
-interface MetaDataMap {
-  [index: string]: unknown;
-}
+type MetaDataMap = Record<string, unknown>;
 
 // WooItem represents an individual line-item in a WooCommerce order.
 export default class WooItem {

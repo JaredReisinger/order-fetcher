@@ -109,18 +109,18 @@ export default class WooClient {
   }
 }
 
-// Stupidly, the link returned from the WordPress/WooCommerce API is not useable
+// Stupidly, the link returned from the WordPress/WooCommerce API is not usable
 // as-is... passing it back through the client results in a 401 error!  To fix,
 // we need to use *only* the non-oauth params and re-create the URL from
-// scratch.  Fortunately, linkParser reutrns the querystring parameters in
+// scratch.  Fortunately, linkParser returns the querystring parameters in
 // additional to the raw url.
 function paramsFromLink(link: linkParser.Link) {
   // function paramsFromLink(link: Record<string, string>) {
   const params = new url.URLSearchParams();
 
-  for (const key of Object.keys(link)) {
-    if (key !== 'rel' && key !== 'url' && !key.startsWith('oauth_')) {
-      params.append(key, link[key]!);
+  for (const [key, val] of Object.entries(link)) {
+    if (key !== 'rel' && key !== 'url' && !key.startsWith('oauth_') && val) {
+      params.append(key, val);
     }
   }
 

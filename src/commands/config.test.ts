@@ -151,7 +151,6 @@ function createConfig(timezone?: string) {
         },
       },
     },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     () => {}
   );
 }
@@ -193,7 +192,6 @@ test('Config.view() should return a Promise (with timezone)', async (t) => {
 });
 
 test('Config.view() handles a missing config', async (t) => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const config = new Config({ _missing: true, hosts: {} }, () => {});
   const result = config.view();
   await t.notThrowsAsync(result);
@@ -225,7 +223,6 @@ test('Config.init() should write config from answers', async (t) => {
       _missing: true,
       hosts: {},
     },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     () => {}
   );
 

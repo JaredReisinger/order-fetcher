@@ -10,6 +10,7 @@
     "plusplus",
     "snyk",
     "tseslint",
+    "wcutils",
     "woocommerce"
   ]
 }
