@@ -134,6 +134,7 @@ hosts:${Object.entries(this.cfg.hosts)
 
     const { name, url, key, secret } = host;
     const cfg = {
+      _filename: this.cfg._filename,
       timezone,
       hosts: {
         [name]: { url, key, secret },

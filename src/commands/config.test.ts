@@ -220,6 +220,7 @@ test('Config.init() should return a Promise', async (t) => {
 test('Config.init() should write config from answers', async (t) => {
   const configMissing = new Config(
     {
+      _filename: 'CONFIG_FILE',
       _missing: true,
       hosts: {},
     },
@@ -267,6 +268,7 @@ test('Config.init() should write config from answers', async (t) => {
 
   t.is(write.callCount, 1);
   t.deepEqual(write.getCall(0).firstArg, {
+    _filename: 'CONFIG_FILE',
     hosts: {
       NAME: {
         key: 'MAGIC_KEY',

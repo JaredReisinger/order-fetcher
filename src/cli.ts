@@ -80,7 +80,7 @@ async function loadConfig(): Promise<ConfigFile> {
   // dbg(0, 'checking for config', { filename });
   try {
     const data = await readFileAsync(filename);
-    const cfg = JSON.parse(data.toString());
+    const cfg = JSON.parse(data.toString()) as ConfigFile;
     cfg._filename = filename;
     return cfg;
   } catch (e) {
