@@ -29,9 +29,11 @@
     "dev": "node --import=tsimp/import src/stub.ts",
     "clean": "rm -r .tsimp coverage dist",
     "lint": "eslint ./src",
-    "test": "ava",
-    "test:coverage": "c8 --all --src src --exclude 'src/stub.ts' --exclude 'src/wc/woocommerce-types.ts' --per-file --reporter lcov --reporter text npm test",
-    "coverage": "npm run test:coverage",
+    "test": "ava --config .ava.tsimp.config.js",
+    "test:coverage": "c8 --all --src src --exclude 'src/stub.ts' --exclude 'src/wc/woocommerce-types.ts' --per-file --reporter lcov --reporter text npm run test",
+    "test:dist": "npm run build && npx ava --config .ava.dist.config.js",
+    "test:dist:coverage": "c8 --all --src src --exclude 'src/stub.ts' --exclude 'src/wc/woocommerce-types.ts' --per-file --reporter lcov --reporter text npm run test:dist",
+    "coverage": "npm run test:dist:coverage",
     "codecov": "codecov",
     "commit": "git-cz",
     "release": "semantic-release",
@@ -107,14 +109,6 @@
     "@typescript-eslint/utils": {
       "eslint": "^9.7.0"
     }
-  },
-  "ava": {
-    "extensions": {
-      "ts": "module"
-    },
-    "nodeArguments": [
-      "--import=tsimp/import"
-    ]
   },
   "config": {
     "commitizen": {
