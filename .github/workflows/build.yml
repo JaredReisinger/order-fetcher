@@ -20,19 +20,13 @@ jobs:
     # means putting *everything* into one job.  We just need to be judicious
     # with 'if' to skip some steps based on matrix stuff...
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: 'npm'
 
       - run: npm ci
 
@@ -55,18 +49,12 @@ jobs:
 
     steps:
       # sadly, we have to re-do the build... but we can skip lint/test
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: 'npm'
 
       - run: npm ci
 
@@ -82,7 +70,7 @@ jobs:
     if: ${{ contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: act10ns/slack@v1
+      - uses: act10ns/slack@v2
         with:
           status: failure
         env:
