@@ -18,7 +18,7 @@ test.afterEach(() => {
   process.argv = prevArgs;
 });
 
-test('cli... runs the app', async (t) => {
+test('cli main runs the app', async (t) => {
   process.argv = ['', '', '--help'];
   await t.notThrowsAsync(() => main(preventYargsExit));
 });

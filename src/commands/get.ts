@@ -120,11 +120,8 @@ export default class Get {
   //   handler:   a function which will be passed the parsed argv.
   async createCommand(host?: string): Promise<CommandModule<Args, Args>> {
     const command = host || 'get';
-    // const aliases = '*'; // this is the default command
     const aliases = undefined;
-    const describe = `gets orders from ${
-      host ? `the ${host}` : 'a'
-    } WooCommerce site`;
+    const describe = `gets orders from ${host ? `the ${host}` : 'a'} WooCommerce site`;
 
     const builder: CommandBuilder<Args, Args> = (yargs) => {
       if (!host) {
@@ -220,24 +217,24 @@ export default class Get {
         //   describe: 'Whether to verify the SSL certificate from the host',
         //   boolean: true,
         // })
-        // .group(['after', 'before', 'status'], 'Order Filtering')
-        // .group(['sku', 'sku-prefix'], 'Item Filtering')
-        // .group(
-        //   [
-        //     'omit-blanks',
-        //     'omit-identical',
-        //     'omit-payment',
-        //     'omit',
-        //     'include',
-        //     'columns',
-        //   ],
-        //   'Column Filtering'
-        // )
-        // .group(['out'], 'Output')
-        // .group(
-        //   ['list-skus', 'list-statuses', 'list-columns'],
-        //   'Discovery (incompatible with "--out" option)'
-        // )
+        .group(['after', 'before', 'status'], 'Order Filtering')
+        .group(['sku', 'sku-prefix'], 'Item Filtering')
+        .group(
+          [
+            'omit-blanks',
+            'omit-identical',
+            'omit-payment',
+            'omit',
+            'include',
+            'columns',
+          ],
+          'Column Filtering'
+        )
+        .group(['out'], 'Output')
+        .group(
+          ['list-skus', 'list-statuses', 'list-columns'],
+          'Discovery (incompatible with "--out" option)'
+        )
         .epilogue(
           `--------------------------------------------------------------------------------
 Best Practices:
@@ -277,20 +274,6 @@ Examples:
     };
   }
 
-  //         if (hosts.length !== 0) {
-  //           console.log(chalkTemplate`{red Creating the config file:
-  //
-  //   You do not appear to have any hosts listed in a {cyan ~/.${pkgInfo.name}.json}
-  //   file.  Please see:
-  //       {cyan.underline ${pkgInfo.homepage}}
-  //   for instructions onsetting this up.}
-  // `);
-  //         }
-  //       })
-  //       // .action(this.handleGlobalOpts)
-  //       .action(this.run);
-  //   }
-
   async run(
     seededHost: string | undefined,
     argv: ArgumentsCamelCase<Args>,
@@ -325,16 +308,7 @@ Examples:
     }
 
     const client =
-      clientOverride ??
-      new WooClient(
-        host.url,
-        host.key,
-        host.secret /*, {
-        verifySsl: argv.verifySsl,
-      }*/
-      );
-
-    // new order stuff...
+      clientOverride ?? new WooClient(host.url, host.key, host.secret);
 
     // Get orders/items and the currencies in parallel.  We could delay awaiting
     // on the currencies until just before generating the CSV, but the code is a
@@ -430,7 +404,7 @@ Examples:
     }
     if (argv.out) {
       const csv = this.generateCsv(items, fields);
-      await writeFileAsync(argv.out, csv);
+      await this.writeFile(argv.out, csv);
     } else {
       const display = this.generatePretty(items, fields);
       helpers.out('');
@@ -443,6 +417,10 @@ Examples:
     const csv = parser.parse(items);
     // const csv = json2csv.parse(items, { fields, withBOM: true });
     return csv;
+  }
+
+  async writeFile(filename: string, content: string) {
+    await writeFileAsync(filename, content);
   }
 
   generatePretty(items: WooItem[], fields: AugmentedFieldInfo<WooItem>[]) {

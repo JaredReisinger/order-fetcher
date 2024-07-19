@@ -7,6 +7,7 @@ import moment from 'moment-timezone';
 import WooClient from '../wc/WooClient.js';
 import WooItem from '../wc/WooItem.js';
 import WooCurrencies from '../wc/WooCurrencies.js';
+// import { Order } from '../wc/woocommerce-types.js';
 
 import Get from './get.js';
 
@@ -24,26 +25,42 @@ const currencies = [
 ];
 
 const order = {
-  id: '12345',
+  id: 12345,
+  number: '12345',
+  date_created_gmt: '2000-01-01T12:00:00.000Z',
   status: 'STATUS',
   total: '123.45',
   currency: 'usd',
-  billing: {},
+  billing: {
+    first_name: 'FIRST_NAME',
+    last_name: 'LAST_NAME',
+    company: 'COMPANY',
+    address_1: 'ADDRESS_1',
+    address_2: 'ADDRESS_2',
+    city: 'CITY',
+    state: 'STATE',
+    postcode: 'POSTCODE',
+    country: 'COUNTRY',
+    email: 'EMAIL',
+    phone: 'PHONE',
+  },
   line_items: [
     {
-      id: '123',
+      id: 123,
+      name: 'ITEM_NAME_1',
       sku: 'SKU_1',
       total: '1.23',
     },
     {
-      id: '234',
+      id: 234,
+      name: 'ITEM_NAME_2',
       sku: 'SKU_2',
       total: '2.34',
       meta_data: [
         { value: 'missing key' },
         { key: '_ignored', value: 'WooCommerce-style metadata' },
         // { key: 'v1 price $0.99', value: 'v1-style price-included key' },
-        { key: 'phone', value: '8005551212' },
+        { key: 'meta-phone', value: '800-555-1212' },
       ],
     },
   ],
@@ -64,17 +81,6 @@ function createGet() {
     () => {}
   );
 }
-
-// async function runCommand(...args) {
-//   process.argv = [
-//     "node", // Not used but a value is required at this index in the array
-//     "cli.js", // Not used but a value is required at this index in the array
-//     ...args,
-//   ];
-
-//   // Require the yargs CLI script
-//   return require("./cli");
-// }
 
 test('Get.createCommands() should return a Promise', async (t) => {
   const get = createGet();
@@ -344,6 +350,36 @@ test('Get.run() can present specific columns', async (t) => {
   );
   t.true(stub.calledWith('orders'));
   await t.notThrowsAsync(result);
+});
+
+test('Get.run() can output CSV to a file', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  const writeFile = sinon.stub(get, 'writeFile').resolves();
+
+  const result = get.run(
+    'foo',
+    // @ts-expect-error -- fake args
+    { out: 'BOGUS.csv' },
+    client
+  );
+
+  await t.notThrowsAsync(result);
+
+  t.is(writeFile.callCount, 1);
+  t.deepEqual(writeFile.getCall(0).args, [
+    'BOGUS.csv',
+    // don't forget leading BOM!
+    `\uFEFF"order#","date","status","name","email","address","phone","sku","item","qty","total","fees","method","transID","note","meta-phone"
+12345,"1/1/2000 12:00:00 PM","STATUS","FIRST_NAME LAST_NAME","EMAIL","ADDRESS_1, ADDRESS_2, CITY, STATE POSTCODE","PHONE","SKU_1","ITEM_NAME_1",,"$1.23",,,,,
+12345,"1/1/2000 12:00:00 PM","STATUS","FIRST_NAME LAST_NAME","EMAIL","ADDRESS_1, ADDRESS_2, CITY, STATE POSTCODE","PHONE","SKU_2","ITEM_NAME_2",,"$2.34",,,,,"800-555-1212"`,
+  ]);
+
+  writeFile.restore();
 });
 
 // TODO: test after/before/status filtering (in call!)

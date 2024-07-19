@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+/* c8 ignore start */
+import process from 'node:process';
+
 import chalk from 'chalk';
 
 import { err, UserError } from './helpers.js';
@@ -19,3 +22,4 @@ try {
 
   process.exit(1);
 }
+/* c8 ignore end */

@@ -30,7 +30,7 @@
     "clean": "rm -r .tsimp coverage dist",
     "lint": "eslint ./src",
     "test": "ava",
-    "test:coverage": "c8 --all --src src --per-file --reporter lcov --reporter text npm test",
+    "test:coverage": "c8 --all --src src --exclude 'src/stub.ts' --exclude 'src/wc/woocommerce-types.ts' --per-file --reporter lcov --reporter text npm test",
     "coverage": "npm run test:coverage",
     "codecov": "codecov",
     "commit": "git-cz",

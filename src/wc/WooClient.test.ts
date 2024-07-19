@@ -2,14 +2,21 @@ import test from 'ava';
 
 import WooClient, { percentEncode } from './WooClient.js';
 
-test('WooClient constructor should create an object', (t) => {
-  const result = new WooClient('URL', 'KEY', 'SECRET');
+test('WooClient constructor creates an object with HTTPS', (t) => {
+  const result = new WooClient('https://URL.org', 'KEY', 'SECRET');
   t.true(result instanceof Object);
   t.true('_apiVersion' in result);
   t.true('_ky' in result);
 });
 
-test.only('percentEncode()', (t) => {
+test('WooClient constructor creates an object with HTTP', (t) => {
+  const result = new WooClient('http://URL.org', 'KEY', 'SECRET');
+  t.true(result instanceof Object);
+  t.true('_apiVersion' in result);
+  t.true('_ky' in result);
+});
+
+test('percentEncode()', (t) => {
   const cases: [string, string][] = [
     ['a', 'a'],
     ['z', 'z'],
