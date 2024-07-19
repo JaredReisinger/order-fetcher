@@ -1,3 +1,16 @@
+# [5.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.2...v5.0.0) (2024-07-19)
+
+
+### Features
+
+* begin stubbing out non-HTTPS auth ([31ae7e9](https://github.com/JaredReisinger/order-fetcher/commit/31ae7e98032202170dd49920cb92ce304b23fc9d))
+* use `ky` instead of `woocommerce-api` ([cf523fa](https://github.com/JaredReisinger/order-fetcher/commit/cf523fa35d820028931814a0c690ffa734db5de1))
+
+
+### BREAKING CHANGES
+
+* --verify-ssl option removed
+
 ## [4.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.1...v4.0.2) (2024-07-18)
 
 
