@@ -19,7 +19,7 @@ Retrieves WooComerce line-item order information and displays it in your termina
 
 ## Purpose
 
-This tool is intended to help in cases where line-item order information needs to be collated/managed per-sku, rather than per-order. For example, one sog club uses a WordPress/WooCommerce site to collect orders for things related to a dog show, and each "thing" is handled by a different person. They use `order-fetcher` with the `--sku` and `--sku-prefix` flags to extract the details on a product-by-product basis, and disseminate that information to the appropriate person.
+This tool is intended to help in cases where line-item order information needs to be collated/managed per-sku, rather than per-order. For example, one dog club uses a WordPress/WooCommerce site to collect orders for things related to a dog show, and each "thing" is handled by a different person. They use `order-fetcher` with the `--sku` and `--sku-prefix` flags to extract the details on a product-by-product basis, and disseminate that information to the appropriate person.
 
 ## Getting started
 
