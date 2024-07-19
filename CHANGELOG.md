@@ -1,3 +1,10 @@
+## [5.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v5.0.0...v5.0.1) (2024-07-19)
+
+
+### Bug Fixes
+
+* **codecov:** remove codecov package; use GitHub Actions uploader instead ([db341a1](https://github.com/JaredReisinger/order-fetcher/commit/db341a1eb866e6404af5f7ef65710242d4c29c64))
+
 # [5.0.0](https://github.com/JaredReisinger/order-fetcher/compare/v4.0.2...v5.0.0) (2024-07-19)
 
 
