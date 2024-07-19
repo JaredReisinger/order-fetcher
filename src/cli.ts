@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import path from 'node:path';
 import util from 'node:util';
 import fs from 'node:fs';
@@ -21,34 +22,34 @@ export interface Args {
 
 export { type Argv };
 
-// See
-// https://exploringjs.com/nodejs-shell-scripting/ch_nodejs-path.html#detecting-if-module-is-main
-// for the logic behind this check...
-if (
-  import.meta.url.startsWith('file:') &&
-  process.argv[1] === fileURLToPath(import.meta.url)
-) {
-  try {
-    await main();
-  } catch (e) {
-    if (e instanceof Error || typeof e === 'string') {
-      err(e);
-    } else {
-      err(`unexpected error: ${typeof e}`);
-    }
+// // See
+// // https://exploringjs.com/nodejs-shell-scripting/ch_nodejs-path.html#detecting-if-module-is-main
+// // for the logic behind this check...
+// if (
+//   import.meta.url.startsWith('file:') &&
+//   process.argv[1] === fileURLToPath(import.meta.url)
+// ) {
+//   try {
+//     await main();
+//   } catch (e) {
+//     if (e instanceof Error || typeof e === 'string') {
+//       err(e);
+//     } else {
+//       err(`unexpected error: ${typeof e}`);
+//     }
 
-    if (
-      !(e instanceof UserError) &&
-      typeof e === 'object' &&
-      e &&
-      'stack' in e
-    ) {
-      err(String(e.stack), chalk.white);
-    }
+//     if (
+//       !(e instanceof UserError) &&
+//       typeof e === 'object' &&
+//       e &&
+//       'stack' in e
+//     ) {
+//       err(String(e.stack), chalk.white);
+//     }
 
-    process.exit(1);
-  }
-}
+//     process.exit(1);
+//   }
+// }
 
 export default async function main(yargsHook?: (yargs: Argv<Args>) => void) {
   const cfg = await loadConfig();
@@ -67,7 +68,17 @@ export default async function main(yargsHook?: (yargs: Argv<Args>) => void) {
         'Increase verbosity of console output, can be given multiple times to increase verbosity',
       count: true,
     })
-    .group(['help', 'version', 'verbose'], 'Global Options');
+    .group(['help', 'version', 'verbose'], 'Global Options')
+    // calling without a subcommand shows the help
+    .command(
+      '*',
+      false,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      () => {},
+      () => {
+        yargs.showHelp();
+      }
+    );
 
   const cmds = await commands.createCommands(cfg, handleGlobalOpts);
   dbg(5, 'commands', { cmds });

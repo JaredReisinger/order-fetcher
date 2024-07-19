@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "node --import=tsimp/import src/cli.ts",
+    "dev": "node --import=tsimp/import src/stub.ts",
     "clean": "rm -r .tsimp coverage dist",
     "lint": "eslint ./src",
     "test": "ava",

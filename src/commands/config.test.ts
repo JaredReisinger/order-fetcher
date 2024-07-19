@@ -349,8 +349,7 @@ test('Config.remove() should remove a host', async (t) => {
 
   const write = sinon.stub(config, 'writeConfig').resolves();
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake args... really need to figure out yargs types...
+  // @ts-expect-error -- fake args... really need to figure out yargs types...
   const result = config.remove({ host: 'foo' });
   t.true(result instanceof Promise);
   await t.notThrowsAsync(result);
@@ -368,8 +367,7 @@ test('Config.remove() without host should fail', async (t) => {
 
   const write = sinon.stub(config, 'writeConfig').resolves();
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake args... really need to figure out yargs types...
+  // @ts-expect-error -- fake args... really need to figure out yargs types...
   const result = config.remove({});
   t.true(result instanceof Promise);
   await t.throwsAsync(result);

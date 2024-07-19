@@ -236,8 +236,7 @@ function createClientStub() {
 test('Get.run() should return a Promise', async (t) => {
   const get = createGet();
   const { client } = createClientStub();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake empty args
+  // @ts-expect-error -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(result instanceof Promise);
   await t.notThrowsAsync(result);
@@ -258,8 +257,7 @@ test('Get.run() requires a host', async (t) => {
 test('Get.run() should request currencies', async (t) => {
   const get = createGet();
   const { client, stub } = createClientStub();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake empty args
+  // @ts-expect-error -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(stub.calledWith('data/currencies'));
   await t.notThrowsAsync(result);
@@ -268,8 +266,7 @@ test('Get.run() should request currencies', async (t) => {
 test('Get.run() should request items', async (t) => {
   const get = createGet();
   const { client, stub } = createClientStub();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake empty args
+  // @ts-expect-error -- fake empty args
   const result = get.run('foo', {}, client);
   t.true(stub.calledWith('orders'));
   await t.notThrowsAsync(result);
@@ -282,8 +279,7 @@ test('Get.run() should not throw with valid (stub) data', async (t) => {
   stub.withArgs('data/currencies').resolves(currencies);
   stub.withArgs('orders').resolves([order]);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake empty args
+  // @ts-expect-error -- fake empty args
   const result = get.run('foo', {}, client);
   await t.notThrowsAsync(async () => {
     await t.notThrowsAsync(result);
@@ -297,8 +293,7 @@ test('Get.run() can filter by sku', async (t) => {
   stub.withArgs('data/currencies').resolves(currencies);
   stub.withArgs('orders').resolves([order]);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake args
+  // @ts-expect-error -- fake args
   const result = get.run('foo', { sku: ['SKU_1'] }, client);
   t.true(stub.calledWith('orders'));
   await t.notThrowsAsync(result);
@@ -311,8 +306,7 @@ test('Get.run() can filter by sku prefix', async (t) => {
   stub.withArgs('data/currencies').resolves(currencies);
   stub.withArgs('orders').resolves([order]);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore -- fake args
+  // @ts-expect-error -- fake args
   const result = get.run('foo', { skuPrefix: ['SKU_'] }, client);
   t.true(stub.calledWith('orders'));
   await t.notThrowsAsync(result);
@@ -327,8 +321,7 @@ test('Get.run() can present meta info', async (t) => {
 
   const result = get.run(
     'foo',
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore -- fake args
+    // @ts-expect-error -- fake args
     { listSkus: true, listStatuses: true, listColumns: true },
     client
   );
@@ -345,8 +338,7 @@ test('Get.run() can present specific columns', async (t) => {
 
   const result = get.run(
     'foo',
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore -- fake args
+    // @ts-expect-error -- fake args
     { columns: 'order#,total' },
     client
   );
