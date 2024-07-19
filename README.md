@@ -1,13 +1,25 @@
 # order-fetcher
 
-Retrieves WooComerce order information and displays it in your terminal or saves it as a CSV file.
+Retrieves WooComerce line-item order information and displays it in your terminal or saves it as a CSV file.
 
 [![npm version](https://img.shields.io/npm/v/order-fetcher.svg?logo=npm)](https://www.npmjs.com/package/order-fetcher)
+![node version](https://img.shields.io/node/v/order-fetcher?logo=node.js&logoColor=white)
+![license](https://img.shields.io/github/license/JaredReisinger/order-fetcher)
 [![build status](https://img.shields.io/github/actions/workflow/status/JaredReisinger/order-fetcher/build.yml?branch=main&logo=github)](https://github.com/JaredReisinger/order-fetcher/actions?query=workflow%3Abuild+branch%3Amain)
-[![code coverage](https://img.shields.io/codecov/c/github/JaredReisinger/order-fetcher.svg?logo=codecov)](https://codecov.io/github/JaredReisinger/order-fetcher)
-[![snyk vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/JaredReisinger/order-fetcher.svg?logo=snyk)](https://snyk.io/test/github/JaredReisinger/order-fetcher)
+[![code coverage](https://img.shields.io/codecov/c/github/JaredReisinger/order-fetcher.svg?logo=codecov&logoColor=white)](https://codecov.io/github/JaredReisinger/order-fetcher)
+[![snyk vulnerabilities](https://snyk.io/test/github/jaredreisinger/order-fetcher/badge.svg)](https://snyk.io/test/github/jaredreisinger/order-fetcher)
+[![dependencies](https://img.shields.io/librariesio/github/JaredReisinger/order-fetcher)](https://libraries.io/github/JaredReisinger/order-fetcher)
+![npm downloads](https://img.shields.io/npm/d18m/order-fetcher)
+[![commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![contributor covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://github.com/JaredReisinger/order-fetcher/blob/main/docs/CODE_OF_CONDUCT.md)
+![designed for WordPress](https://img.shields.io/badge/designed%20for-WordPress-%2321759B?logo=wordpress&logoColor=white)
+![designed for WooCommerce](https://img.shields.io/badge/designed%20for-WooCommerce-%2396588A?logo=woo&logoColor=white)
 
 ![](./docs/order-fetcher.png)
+
+## Purpose
+
+This tool is intended to help in cases where line-item order information needs to be collated/managed per-sku, rather than per-order. For example, one sog club uses a WordPress/WooCommerce site to collect orders for things related to a dog show, and each "thing" is handled by a different person. They use `order-fetcher` with the `--sku` and `--sku-prefix` flags to extract the details on a product-by-product basis, and disseminate that information to the appropriate person.
 
 ## Getting started
 
@@ -18,8 +30,6 @@ The nickname you give your site allows you to disambiguate if you have more than
 If you don’t have too many historical orders on your site, your first request can be as simple as `orders host1`. If you have a lot of orders, however, that command can take a while. Using the `--after` option to only include orders on-or-after a particular date (like `orders host1 --after 2019-07-01`) can dramatically improve performance.
 
 ## Usage
-
-As of v1.0, `order-fetcher` now also installs as the command `orders`, and uses a more “subcommand”-style command-line (like git, npm, and other tools). It also uses the host nicknames (as defined above, in [Getting Started](#getting-started)) as subcommand shortcuts rather than the older and more-verbose `--host hostname` flag. Note that you can still use `orders get --host host1 ...` rather than `orders host1 ...`, but you’ll find that the newer second invocation is more natural and involves less typing.
 
 When all else fails, `orders --help` (or `order-fetcher --help`) lists all of the available options.
 
@@ -46,24 +56,24 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 
 ### `get` (or _`host-nickname`_) options
 
-| option                     | description                                                         |
-| -------------------------- | ------------------------------------------------------------------- |
-| `--host` _host-nickname_   | WooCommerce host to use _(**only** for `orders get`)_               |
-| `--after` _date_           | include only orders after the date                                  |
-| `--before` _date_          | include only orders before the date                                 |
-| `--status` _status_        | include only orders with the given status                           |
-| `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: ) |
-| `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )   |
-| `--list-skus`              | list the skus found in the orders                                   |
-| `--list-statuses`          | list the statuses found in the orders                               |
-| `--list-columns`           | list the available columns found in the items                       |
-| `--omit-blanks`            | omits columns where every item's value is blank or missing          |
-| `--omit-identical`         | omits columns where every item's value is identical                 |
-| `--omit-payment`           | omits payment columns (including payer address and phone)           |
-| `--omit` _column_          | omits a specific column                                             |
-| `--include` _column_       | includes a specific column                                          |
-| `--columns` _column-list_  | selects an exact set of columns to display (comma-separated names)  |
-| `-o`, `--out` _filename_   | file to write (CSV format)                                          |
+| option                     | description                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `--host` _host-nickname_   | WooCommerce host to use _(**only** for `orders get`, not needed when using a nickname directly)_ |
+| `--after` _date_           | include only orders after the date                                                               |
+| `--before` _date_          | include only orders before the date                                                              |
+| `--status` _status_        | include only orders with the given status                                                        |
+| `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: )                              |
+| `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )                                |
+| `--list-skus`              | list the skus found in the orders                                                                |
+| `--list-statuses`          | list the statuses found in the orders                                                            |
+| `--list-columns`           | list the available columns found in the items                                                    |
+| `--omit-blanks`            | omits columns where every item's value is blank or missing                                       |
+| `--omit-identical`         | omits columns where every item's value is identical                                              |
+| `--omit-payment`           | omits payment columns (including payer address and phone)                                        |
+| `--omit` _column_          | omits a specific column                                                                          |
+| `--include` _column_       | includes a specific column                                                                       |
+| `--columns` _column-list_  | selects an exact set of columns to display (comma-separated names)                               |
+| `-o`, `--out` _filename_   | file to write (CSV format)                                                                       |
 
 ### Best practices
 
@@ -83,10 +93,22 @@ If the `--omit-...` options are too coarse, you can enable or disable individual
 orders host1 --after 2019-01-01 --status processing --list-skus
 ```
 
-Retrieve all orders after 1 January 2019 (inclusive) with a status of "processing", and list the unique SKUs. This is useful as a precursor to creating per-SKU CSV files.
+Retrieve all order line-items after 1 January 2019 (inclusive) with a status of "processing", and list the unique SKUs. This is useful as a precursor to creating per-SKU CSV files.
 
 ```sh
 orders host1 --after 2019-01-01 --status processing --sku some-sku --out some-sku.csv
 ```
 
-Retrieve all orders as in the previous command, filter the items to the SKU 'some-sku', and write to 'some-sku.csv'.
+Retrieve all order line-items as in the previous command, filter the items to the SKU `some-sku`, and write to 'some-sku.csv'.
+
+```sh
+orders host1 --sku-prefix some-sku --list-columns
+```
+
+Retrieve all order line-items with a sku that starts with `some-sku`, and list the available columns.
+
+```sh
+orders host1 --after 2019-01-01 --sku-prefix some-sku --columns "name,email,image" --out some-sku.csv
+```
+
+Retrieve all order line-items with a sku that starts with `some-sku`, and write only the "name", "email", and "image" columns and to 'some-sku.csv'
