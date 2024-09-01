@@ -1,3 +1,13 @@
+## [5.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v5.0.1...v5.0.2) (2024-09-01)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependencies ([0f1c5c8](https://github.com/JaredReisinger/order-fetcher/commit/0f1c5c8553b65335bd94230df4e47ba5a3e2d3f6))
+* make stub executable ([a5acaad](https://github.com/JaredReisinger/order-fetcher/commit/a5acaad1bd6332e77beec868f9843d458e446ebb))
+* properly handle multi-value meta keys ([53cc3d9](https://github.com/JaredReisinger/order-fetcher/commit/53cc3d982291be7f0eca307040aa7b97e3a4c2c4))
+* support column names with commas ([726aede](https://github.com/JaredReisinger/order-fetcher/commit/726aede0c1331b6dfd22512e2cc1928347d2a1bf))
+
 ## [5.0.1](https://github.com/JaredReisinger/order-fetcher/compare/v5.0.0...v5.0.1) (2024-07-19)
 
 
