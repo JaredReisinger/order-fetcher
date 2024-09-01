@@ -376,7 +376,7 @@ test('Get.run() can output CSV to a file', async (t) => {
     // don't forget leading BOM!
     `\uFEFF"order#","date","status","name","email","address","phone","sku","item","qty","total","fees","method","transID","note","meta-phone"
 12345,"1/1/2000 12:00:00 PM","STATUS","FIRST_NAME LAST_NAME","EMAIL","ADDRESS_1, ADDRESS_2, CITY, STATE POSTCODE","PHONE","SKU_1","ITEM_NAME_1",,"$1.23",,,,,
-12345,"1/1/2000 12:00:00 PM","STATUS","FIRST_NAME LAST_NAME","EMAIL","ADDRESS_1, ADDRESS_2, CITY, STATE POSTCODE","PHONE","SKU_2","ITEM_NAME_2",,"$2.34",,,,,"800-555-1212"`,
+12345,"1/1/2000 12:00:00 PM","STATUS","FIRST_NAME LAST_NAME","EMAIL","ADDRESS_1, ADDRESS_2, CITY, STATE POSTCODE","PHONE","SKU_2","ITEM_NAME_2",,"$2.34",,,,,"(800) 555-1212"`,
   ]);
 
   writeFile.restore();

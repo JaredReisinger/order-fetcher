@@ -48,7 +48,16 @@ export default class WooItem {
     // 'key' property as the key!
     // this.meta = {};
     dbg(3, 'metadata', wcItem.meta_data);
-    this.meta = (wcItem.meta_data || []).reduce<MetaDataMap>((memo, m) => {
+    this.meta = WooItem.convertMetadata(order.id, wcItem.meta_data);
+
+    dbg(1, 'WooItem', this);
+  }
+
+  static convertMetadata(
+    orderId: number,
+    metadata?: LineItem['meta_data']
+  ): MetaDataMap {
+    const map = (metadata || []).reduce<MetaDataMap>((memo, m) => {
       // The wc/v1 code used to use entities.decodeHTML, but I'm not seeing the
       // need in the v2 API...  Also, there's an ID, but it's not useful, it's
       // just the table row ID for the meta information, *not* specific to the
@@ -56,7 +65,7 @@ export default class WooItem {
       let { key, value } = m;
 
       if (!key) {
-        dbg(0, `order ${order.id} has meta with no key: ${JSON.stringify(m)}`);
+        dbg(0, `order ${orderId} has meta with no key: ${JSON.stringify(m)}`);
         return memo;
       }
 
@@ -72,16 +81,23 @@ export default class WooItem {
         key = key.replace(hasPriceRE, '');
       }
 
-      if (isPhoneRE.test(value)) {
+      if (isPhoneRE.test(key)) {
         value = wcutils.normalizePhone(value);
       }
 
-      memo[key] = value;
+      // If there's already a value for this key, append as an array
+      if (memo[key] !== undefined) {
+        const asArray = arrayify(memo[key]);
+        asArray.push(value);
+        memo[key] = asArray;
+      } else {
+        memo[key] = value;
+      }
 
       return memo;
     }, {});
 
-    dbg(1, 'WooItem', this);
+    return map;
   }
 
   // Creates an array of WooItem objects from the raw JSON order data.
@@ -104,4 +120,11 @@ export default class WooItem {
     // dbg(2, 'wcOrder', wcOrder);
     return wcOrder.line_items.map((wcItem, i) => new WooItem(wcItem, order, i));
   }
+}
+
+function arrayify<T>(arg: T | T[]): T[] {
+  if (Array.isArray(arg)) {
+    return arg;
+  }
+  return [arg];
 }

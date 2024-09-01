@@ -39,6 +39,29 @@ test('WooItem.itemize should have an item for each line_item', (t) => {
   t.is(result.length, order.line_items.length);
 });
 
+test('WooItem.itemize should add metadata fields', (t) => {
+  const result = WooItem.itemize(order);
+  t.is(result.length, order.line_items.length);
+  t.is(Object.keys(result[1].meta).length, 2);
+});
+
+test('WooItem.convertMetadata should normalize phone numbers', (t) => {
+  t.deepEqual(
+    WooItem.convertMetadata(1, [{ id: 0, key: 'phone', value: '8005551212' }]),
+    { phone: '(800) 555-1212' }
+  );
+});
+
+test('WooItem.convertMetadata should combine repeat keys', (t) => {
+  t.deepEqual(
+    WooItem.convertMetadata(1, [
+      { id: 0, key: 'multiple', value: 'one' },
+      { id: 0, key: 'multiple', value: 'two' },
+    ]),
+    { multiple: ['one', 'two'] }
+  );
+});
+
 test('WooItem.fromOrdersJson calls itemize on all of the orders', (t) => {
   // const itemize = sinon.stub(WooItem, 'itemize');
   const result = WooItem.fromOrdersJson([order, order, order]);
