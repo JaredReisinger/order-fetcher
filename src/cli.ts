@@ -22,35 +22,6 @@ export interface Args {
 
 export { type Argv };
 
-// // See
-// // https://exploringjs.com/nodejs-shell-scripting/ch_nodejs-path.html#detecting-if-module-is-main
-// // for the logic behind this check...
-// if (
-//   import.meta.url.startsWith('file:') &&
-//   process.argv[1] === fileURLToPath(import.meta.url)
-// ) {
-//   try {
-//     await main();
-//   } catch (e) {
-//     if (e instanceof Error || typeof e === 'string') {
-//       err(e);
-//     } else {
-//       err(`unexpected error: ${typeof e}`);
-//     }
-
-//     if (
-//       !(e instanceof UserError) &&
-//       typeof e === 'object' &&
-//       e &&
-//       'stack' in e
-//     ) {
-//       err(String(e.stack), chalk.white);
-//     }
-
-//     process.exit(1);
-//   }
-// }
-
 export default async function main(yargsHook?: (yargs: Argv<Args>) => void) {
   const cfg = await loadConfig();
 
@@ -118,6 +89,7 @@ async function loadConfig(): Promise<ConfigFile> {
     const cfg = JSON.parse(data.toString()) as ConfigFile;
     cfg._filename = filename;
     return cfg;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     // We *could* check the error code for errno -2 (ENOENT), but really
     // any failure means we should have the default config...

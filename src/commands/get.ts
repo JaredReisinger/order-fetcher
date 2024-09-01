@@ -349,7 +349,7 @@ Examples:
 
     // Determine all the fields based on the items, and analyze them so that we
     // can (potentially) omit some...
-    const allFields = this.defineAllFields(items, currencies);
+    const allFields = this.discoverFields(items, currencies);
 
     const metaOnly = argv.listSkus || argv.listStatuses || argv.listColumns;
 
@@ -372,11 +372,42 @@ Examples:
     let fields: typeof allFields;
 
     if (argv.columns) {
-      // If columns is given, create *exactly* those fields...
-      const cols = argv.columns.split(',').map((s) => s.trim());
-      fields = cols
-        .map((c) => allFields.find((f) => f.label === c))
-        .filter(exists);
+      // If columns is given, create *exactly* those fields... note that a
+      // column/meta name *can* contain a comma; we use "\," for this.  We used
+      // to have a simple map() to process, but we need a loop to handle
+      // "compressing" elements together if needed.
+      const cols = argv.columns.split(',');
+      for (let i = 0; i < cols.length; i++) {
+        // if the column ends with \, combine, and restart processing from the
+        // same field (in case there's another escape!)
+        const s = cols[i];
+        if (s.endsWith('\\') && i + 1 < cols.length) {
+          cols[i] = `${s.substring(0, s.length - 1)},${cols[i + 1]}`;
+          cols.splice(i + 1, 1);
+          i--;
+          continue;
+        }
+
+        cols[i] = s.trim();
+      }
+
+      // We *used* to filter to only existing (found) columns/fields, but there
+      // are cases where we need a placeholder column in the CSV... for an
+      // occasional field, we don't want the output to change based on a
+      // particular range *not* having the column!
+      fields = cols.map(
+        (c) =>
+          allFields.find((f) => f.label === c) || {
+            label: c,
+            value: () => '',
+            config: {},
+            meta: {
+              allBlank: true,
+              allIdentical: true,
+              maximumWidth: c.length,
+            },
+          }
+      );
     } else {
       // Regardless of the "--omit-..." options, we *always* want to include the
       // quantity and total.
@@ -531,8 +562,7 @@ Examples:
     // .replace(printable.ansiEscapeCodes, ''); // can't do this... chalk!
   }
 
-  // TODO: we need a way to customize the fields: re-order, include/omit, etc.
-  defineAllFields(items: WooItem[], currencies: WooCurrencies) {
+  discoverFields(items: WooItem[], currencies: WooCurrencies) {
     // We always wants these fields first... each item is either used as both a
     // key and label, or is a [label, key] pair (or [label, key, config]).
     const fieldLabelKeys = [
@@ -618,27 +648,75 @@ Examples:
     return allFields;
   }
 
-  collectMetaFields(items: WooItem[]) {
-    // While wc/v1 included separate label/key information in the line item
-    // metadata, v2 and v3 have only the key.  For add-on properties, it is a
-    // good displayable value; variation attributes, however, return the
-    // attribute/variation *slug* as the key.  There's not much we can do about
-    // this.  (In theory, we could introspect the product, but we don't want
-    // that much detailed knowledge in this tool!)
-    const slugs = new Set(items.flatMap((i) => Object.keys(i.meta)));
-    helpers.dbg(3, 'meta slugs', slugs);
-    const metaFields = [...slugs].map<AugmentedFieldInfo<WooItem>>((s) => ({
-      // value: `meta["${s}"].value`,
-      value: `meta["${s}"]`,
-      label: s,
-      meta: {
-        allBlank: true,
-        allIdentical: true,
-        maximumWidth: s.length,
-      },
-    }));
+  collectMetaFields(items: WooItem[]): AugmentedFieldInfo<WooItem>[] {
+    // For each key in the meta sub-object, create a field definition. Also be
+    // aware that some meta fields can contain *lists*, in which case we create
+    // a pseudo-field for each sub-item.
+    const metaFieldMap: Record<string, AugmentedFieldInfo<WooItem>> = {};
 
-    metaFields.sort((a, b) => helpers.stringCompare(a.label, b.label));
+    items.forEach((i) => {
+      Object.entries(i.meta).forEach(([key, val]) => {
+        // first, create a field for the main key if we haven't seen it yet
+        if (!metaFieldMap[key]) {
+          metaFieldMap[key] = {
+            label: key,
+            // we used to just use `meta["key"]` as the value accessor, but we
+            // now need to also handle array-containing cases!
+            value: (item: WooItem) => {
+              const itemVal = item.meta[key];
+              if (Array.isArray(itemVal)) {
+                return itemVal.join(', ');
+              }
+              return itemVal;
+            },
+
+            config: {},
+
+            meta: {
+              allBlank: true,
+              allIdentical: true,
+              maximumWidth: key.length,
+            },
+          };
+        }
+
+        // now, include any sub-fields...
+        if (Array.isArray(val)) {
+          val.forEach((subval: string) => {
+            const subkey = `${key}: ${subval}`;
+            if (!metaFieldMap[subkey]) {
+              metaFieldMap[subkey] = {
+                label: subkey,
+                // we used to just use `meta["key"]` as the value accessor, but we
+                // now need to also handle array-containing cases!
+                value: (item: WooItem) => {
+                  const itemVal = item.meta[key];
+                  if (
+                    itemVal === subval ||
+                    (Array.isArray(itemVal) && itemVal.includes(subval))
+                  ) {
+                    return 'YES';
+                  }
+                  return '';
+                },
+
+                config: {},
+
+                meta: {
+                  allBlank: true,
+                  allIdentical: true,
+                  maximumWidth: subkey.length,
+                },
+              };
+            }
+          });
+        }
+      });
+    });
+
+    const metaFields = Object.values(metaFieldMap).sort((a, b) =>
+      helpers.stringCompare(a.label, b.label)
+    );
     helpers.dbg(3, 'metaFields', metaFields);
 
     return metaFields;
@@ -712,6 +790,6 @@ function listFieldValues<T>(
   );
 }
 
-function exists<T>(value: T | undefined | null | false | ''): value is T {
-  return !!value;
-}
+// function exists<T>(value: T | undefined | null | false | ''): value is T {
+//   return !!value;
+// }

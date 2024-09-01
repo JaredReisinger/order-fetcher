@@ -200,17 +200,30 @@ test('Get.collectMetaFields() should return meta field descriptors', (t) => {
     { meta: { meta1: '' } },
     { meta: { meta2: '' } },
     { meta: { meta1: 'SOME-VALUE' } },
+    { meta: { arr: ['one', 'two'] } },
   ] as unknown as WooItem[]);
-  t.deepEqual(result, [
+
+  // we don't test against `value`, because it's a lexically-scoped accessor
+  // function
+  t.like(result, [
+    {
+      label: 'arr',
+      meta: { allBlank: true, allIdentical: true, maximumWidth: 3 },
+    },
+    {
+      label: 'arr: one',
+      meta: { allBlank: true, allIdentical: true, maximumWidth: 8 },
+    },
+    {
+      label: 'arr: two',
+      meta: { allBlank: true, allIdentical: true, maximumWidth: 8 },
+    },
     {
       label: 'meta1',
-      value: 'meta["meta1"]',
-      // value analysis hasn't happened yet!
       meta: { allBlank: true, allIdentical: true, maximumWidth: 5 },
     },
     {
       label: 'meta2',
-      value: 'meta["meta2"]',
       meta: { allBlank: true, allIdentical: true, maximumWidth: 5 },
     },
   ]);
@@ -346,6 +359,23 @@ test('Get.run() can present specific columns', async (t) => {
     'foo',
     // @ts-expect-error -- fake args
     { columns: 'order#,total' },
+    client
+  );
+  t.true(stub.calledWith('orders'));
+  await t.notThrowsAsync(result);
+});
+
+test('Get.run() can handle escaped-comma columns', async (t) => {
+  const get = createGet();
+  const { client, stub } = createClientStub();
+
+  stub.withArgs('data/currencies').resolves(currencies);
+  stub.withArgs('orders').resolves([order]);
+
+  const result = get.run(
+    'foo',
+    // @ts-expect-error -- fake args
+    { columns: 'column\\, with comma' },
     client
   );
   t.true(stub.calledWith('orders'));
