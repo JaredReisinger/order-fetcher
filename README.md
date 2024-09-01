@@ -56,24 +56,24 @@ When all else fails, `orders --help` (or `order-fetcher --help`) lists all of th
 
 ### `get` (or _`host-nickname`_) options
 
-| option                     | description                                                                                      |
-| -------------------------- | ------------------------------------------------------------------------------------------------ |
-| `--host` _host-nickname_   | WooCommerce host to use _(**only** for `orders get`, not needed when using a nickname directly)_ |
-| `--after` _date_           | include only orders after the date                                                               |
-| `--before` _date_          | include only orders before the date                                                              |
-| `--status` _status_        | include only orders with the given status                                                        |
-| `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: )                              |
-| `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )                                |
-| `--list-skus`              | list the skus found in the orders                                                                |
-| `--list-statuses`          | list the statuses found in the orders                                                            |
-| `--list-columns`           | list the available columns found in the items                                                    |
-| `--omit-blanks`            | omits columns where every item's value is blank or missing                                       |
-| `--omit-identical`         | omits columns where every item's value is identical                                              |
-| `--omit-payment`           | omits payment columns (including payer address and phone)                                        |
-| `--omit` _column_          | omits a specific column                                                                          |
-| `--include` _column_       | includes a specific column                                                                       |
-| `--columns` _column-list_  | selects an exact set of columns to display (comma-separated names)                               |
-| `-o`, `--out` _filename_   | file to write (CSV format)                                                                       |
+| option                     | description                                                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--host` _host-nickname_   | WooCommerce host to use _(**only** for `orders get`, not needed when using a nickname directly)_                 |
+| `--after` _date_           | include only orders after the date                                                                               |
+| `--before` _date_          | include only orders before the date                                                                              |
+| `--status` _status_        | include only orders with the given status                                                                        |
+| `--sku` _sku_              | filter to the specific sku, can be given multiple times (default: )                                              |
+| `--sku-prefix` _skuPrefix_ | filter to the sku prefix, can be given multiple times (default: )                                                |
+| `--list-skus`              | list the skus found in the orders                                                                                |
+| `--list-statuses`          | list the statuses found in the orders                                                                            |
+| `--list-columns`           | list the available columns found in the items                                                                    |
+| `--omit-blanks`            | omits columns where every item's value is blank or missing                                                       |
+| `--omit-identical`         | omits columns where every item's value is identical                                                              |
+| `--omit-payment`           | omits payment columns (including payer address and phone)                                                        |
+| `--omit` _column_          | omits a specific column                                                                                          |
+| `--include` _column_       | includes a specific column                                                                                       |
+| `--columns` _column-list_  | selects an exact set of columns to display (comma-separated names, use `\,` to include a comma in a column name) |
+| `-o`, `--out` _filename_   | file to write (CSV format)                                                                                       |
 
 ### Best practices
 
@@ -83,9 +83,9 @@ When generating CSV output, the columns come directly from the item information 
 
 ### About column filtering
 
-The various `--omit...` and `--include` options control whether columns are included or omitted in the output. As a rule of thumb, columns are included for CSV file output for consistency across invocations, and the `--omit-...` options are enabled by default for screen output to reduce line-wrapping. If you need to _not_ omit columns for screen output, you can prefixthe option with `no`, as in `--no-omit-identical`.
+The various `--omit...` and `--include` options control whether columns are included or omitted in the output. As a rule of thumb, columns are included for CSV file output for consistency across invocations, and the `--omit-...` options are enabled by default for screen output to reduce line-wrapping. If you need to _not_ omit columns for screen output, you can prefix the option with `no`, as in `--no-omit-identical`.
 
-If the `--omit-...` options are too coarse, you can enable or disable individual columns using the `--include` and `--omit` options, or for complete control use the `--columns` option to specify _exactly_ what columns you want displayed and in what order they will appear. Using `--list-columns` will list all of the column names available. Do note that unless you use `--columns` to specify an exact set, the following columns are _always_ included: "order#", "date", "name", "email", "qty", and "total".
+If the `--omit-...` options are too coarse, you can enable or disable individual columns using the `--include` and `--omit` options, or for complete control use the `--columns` option to specify _exactly_ what columns you want displayed and in what order they will appear. Using `--list-columns` will list all of the columns present in a given set of items. Do note that unless you use `--columns` to specify an exact set, the following columns are _always_ included: "order#", "date", "name", "email", "qty", and "total".
 
 ### Examples
 

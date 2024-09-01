@@ -205,7 +205,7 @@ export default class Get {
         })
         .option('columns', {
           describe:
-            'Selects an exact set of columns to display (comma-separated names)',
+            'Selects an exact set of columns to display (comma-separated names, use `\\,` to include a comma in a column name)',
         })
         .option('out', {
           alias: 'o',
@@ -247,13 +247,13 @@ About Column Filtering:
 
   The various "--omit..." and "--include" options control whether columns are included or omitted in the output.  As a rule of thumb, columns are included for CSV file output for consistency across invocations, and the "--omit-..." options are enabled by default for screen output to reduce line-wrapping.  If you need to *not* omit columns for screen output, you can prefix the option with "no", as in "--no-omit-identical".
 
-  If the "--omit-..." options are too coarse, you can enable or disable individual columns using the "--include" and "--omit" options, or for complete control use the "--columns" option to specify *exactly* what columns you want displayed and in what order they will appear.  Using "--list-columns" will list all of the column names available.  Do note that Do note that unless you use "--columns" to specify an exact set, the following columns are *always* included: "order#", "date", "name", "email", "qty", and "total".
+  If the "--omit-..." options are too coarse, you can enable or disable individual columns using the "--include" and "--omit" options, or for complete control use the "--columns" option to specify *exactly* what columns you want displayed and in what order they will appear.  Using "--list-columns" will list all of the column names present in a given set of items.  Do note that Do note that unless you use "--columns" to specify an exact set, the following columns are *always* included: "order#", "date", "name", "email", "qty", and "total".
 
 Examples:
 
     $0 host1 --after 2018-01-01 --status processing --list-skus
 
-  Retrieve all orders after 1 January 2018 (inclusive) with a status of "procesing", and list the unique SKUs.  This is useful as a precursor to creating per-SKU CSV files.
+  Retrieve all orders after 1 January 2018 (inclusive) with a status of "processing", and list the unique SKUs.  This is useful as a precursor to creating per-SKU CSV files.
 
     $0 host1 --after 2018-01-01 --status processing --sku some-sku --out some-sku.csv
 
