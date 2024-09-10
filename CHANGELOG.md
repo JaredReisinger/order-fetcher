@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/JaredReisinger/order-fetcher/compare/v5.0.2...v5.1.0) (2024-09-10)
+
+
+### Features
+
+* add column aliasing ([3295b4b](https://github.com/JaredReisinger/order-fetcher/commit/3295b4bbdf40231595be03fa01499a8d71e0ed35))
+
 ## [5.0.2](https://github.com/JaredReisinger/order-fetcher/compare/v5.0.1...v5.0.2) (2024-09-01)
 
 
