@@ -382,6 +382,24 @@ test('Get.run() can handle escaped-comma columns', async (t) => {
   await t.notThrowsAsync(result);
 });
 
+test('Get.createColumnFields() can handle list of columns', (t) => {
+  const actual = Get.createColumnFields('one,two,three', []);
+  t.like(actual[0], { label: 'one' });
+  t.like(actual[1], { label: 'two' });
+  t.like(actual[2], { label: 'three' });
+});
+
+test('Get.createColumnFields() can handle escaped-comma columns', (t) => {
+  const actual = Get.createColumnFields('one\\,two,three', []);
+  t.like(actual[0], { label: 'one,two' });
+  t.like(actual[1], { label: 'three' });
+});
+
+test('Get.createColumnFields() can handle column alias', (t) => {
+  const actual = Get.createColumnFields('the_sku=sku', []);
+  t.like(actual[0], { label: 'the_sku' });
+});
+
 test('Get.run() can output CSV to a file', async (t) => {
   const get = createGet();
   const { client, stub } = createClientStub();

@@ -249,6 +249,8 @@ About Column Filtering:
 
   If the "--omit-..." options are too coarse, you can enable or disable individual columns using the "--include" and "--omit" options, or for complete control use the "--columns" option to specify *exactly* what columns you want displayed and in what order they will appear.  Using "--list-columns" will list all of the column names present in a given set of items.  Do note that Do note that unless you use "--columns" to specify an exact set, the following columns are *always* included: "order#", "date", "name", "email", "qty", and "total".
 
+  The "--columns" option also allows for columns/fields with commas in the name by backslash-escaping the comma, "as\\,such".  You can also provide column aliases if you need to rename the output column using the "alias=real_name" syntax.
+
 Examples:
 
     $0 host1 --after 2018-01-01 --status processing --list-skus
@@ -372,42 +374,7 @@ Examples:
     let fields: typeof allFields;
 
     if (argv.columns) {
-      // If columns is given, create *exactly* those fields... note that a
-      // column/meta name *can* contain a comma; we use "\," for this.  We used
-      // to have a simple map() to process, but we need a loop to handle
-      // "compressing" elements together if needed.
-      const cols = argv.columns.split(',');
-      for (let i = 0; i < cols.length; i++) {
-        // if the column ends with \, combine, and restart processing from the
-        // same field (in case there's another escape!)
-        const s = cols[i];
-        if (s.endsWith('\\') && i + 1 < cols.length) {
-          cols[i] = `${s.substring(0, s.length - 1)},${cols[i + 1]}`;
-          cols.splice(i + 1, 1);
-          i--;
-          continue;
-        }
-
-        cols[i] = s.trim();
-      }
-
-      // We *used* to filter to only existing (found) columns/fields, but there
-      // are cases where we need a placeholder column in the CSV... for an
-      // occasional field, we don't want the output to change based on a
-      // particular range *not* having the column!
-      fields = cols.map(
-        (c) =>
-          allFields.find((f) => f.label === c) || {
-            label: c,
-            value: () => '',
-            config: {},
-            meta: {
-              allBlank: true,
-              allIdentical: true,
-              maximumWidth: c.length,
-            },
-          }
-      );
+      fields = Get.createColumnFields(argv.columns, allFields);
     } else {
       // Regardless of the "--omit-..." options, we *always* want to include the
       // quantity and total.
@@ -728,6 +695,70 @@ Examples:
 
   formatAmount(amt: string, code: string, currencies: WooCurrencies) {
     return `${currencies.getSymbol(code)}${amt}`;
+  }
+
+  static createColumnFields(
+    columns: string,
+    allFields: AugmentedFieldInfo<WooItem>[]
+  ) {
+    // If columns is given, create *exactly* those fields... note that a
+    // column/meta name *can* contain a comma; we use "\," for this.  We used
+    // to have a simple map() to process, but we need a loop to handle
+    // "compressing" elements together if needed.
+    const cols = columns.split(',');
+    for (let i = 0; i < cols.length; i++) {
+      // if the column ends with \, combine, and restart processing from the
+      // same field (in case there's another escape!)
+      const s = cols[i];
+      if (s.endsWith('\\') && i + 1 < cols.length) {
+        cols[i] = `${s.substring(0, s.length - 1)},${cols[i + 1]}`;
+        cols.splice(i + 1, 1);
+        i--;
+        continue;
+      }
+
+      cols[i] = s.trim();
+    }
+
+    // We *used* to filter to only existing (found) columns/fields, but there
+    // are cases where we need a placeholder column in the CSV... for an
+    // occasional field, we don't want the output to change based on a
+    // particular range *not* having the column!
+    const fields = cols.map((c) => {
+      // We now support `alias=field_name` for a column, so we need to handle
+      // parsing that.
+      const alias = c.split('=', 2);
+      const label = alias[0];
+      const sourceLabel = alias[alias.length - 1];
+      let col = allFields.find(
+        (f) => f.label === sourceLabel || f.label === c
+      ) || {
+        label: alias[0],
+        value: () => '',
+        config: {},
+        meta: {
+          allBlank: true,
+          allIdentical: true,
+          maximumWidth: c.length,
+        },
+      };
+
+      if (alias.length > 1) {
+        col = {
+          ...col,
+          label,
+          meta: {
+            ...col.meta,
+            maximumWidth: Math.max(col.meta.maximumWidth, label.length),
+          },
+        };
+      }
+
+      return col;
+    });
+
+    console.log('COLUMNS', fields);
+    return fields;
   }
 }
 

@@ -87,6 +87,8 @@ The various `--omit...` and `--include` options control whether columns are incl
 
 If the `--omit-...` options are too coarse, you can enable or disable individual columns using the `--include` and `--omit` options, or for complete control use the `--columns` option to specify _exactly_ what columns you want displayed and in what order they will appear. Using `--list-columns` will list all of the columns present in a given set of items. Do note that unless you use `--columns` to specify an exact set, the following columns are _always_ included: "order#", "date", "name", "email", "qty", and "total".
 
+The `--columns` option also allows for columns/fields with commas in the name by backslash-escaping the comma, `as\,such`. You can also provide column aliases if you need to rename the output column using the `alias=real_name` syntax.
+
 ### Examples
 
 ```sh
@@ -99,7 +101,7 @@ Retrieve all order line-items after 1 January 2019 (inclusive) with a status of 
 orders host1 --after 2019-01-01 --status processing --sku some-sku --out some-sku.csv
 ```
 
-Retrieve all order line-items as in the previous command, filter the items to the SKU `some-sku`, and write to 'some-sku.csv'.
+Retrieve all order line-items as in the previous command, filter the items to the sku `some-sku`, and write to 'some-sku.csv'.
 
 ```sh
 orders host1 --sku-prefix some-sku --list-columns
@@ -112,3 +114,9 @@ orders host1 --after 2019-01-01 --sku-prefix some-sku --columns "name,email,imag
 ```
 
 Retrieve all order line-items with a sku that starts with `some-sku`, and write only the "name", "email", and "image" columns and to 'some-sku.csv'
+
+```sh
+orders host1 --after 2019-01-01 --sku some-sku --columns "name,count=qty" --out some-sku.csv
+```
+
+Retrieve all order line-items with the sku `some-sku` and write the column "name" and the "qty" column with the label "count" to 'some-sku.csv'
