@@ -45,7 +45,7 @@ export default class WooOrder {
     // this.date_created = moment.utc(wcOrder.date_created_gmt);
     this.date = moment.utc(wcOrder.date_created_gmt);
 
-    dbg(1, 'WooOrder', this);
+    dbg(2, 'WooOrder', this);
   }
 
   static simplifyBilling(wcBilling: Billing): SimplifiedBilling {

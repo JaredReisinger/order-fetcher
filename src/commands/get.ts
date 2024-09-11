@@ -332,17 +332,17 @@ Examples:
       const skus = argv.sku;
       items = items.filter((i) => skus.includes(i.sku));
       helpers.out(`found ${items.length} ${skus.join(',')} items...`);
-      helpers.dbg(2, 'filtered items (sku)', items);
+      helpers.dbg(3, 'filtered items (sku)', items);
     }
 
     if (argv.skuPrefix) {
       const prefixes = argv.skuPrefix;
       items = items.filter((i) => prefixes.some((p) => i.sku.startsWith(p)));
       helpers.out(`found ${items.length} ${prefixes.join(',')} items...`);
-      helpers.dbg(2, 'filtered items (sku prefix)', items);
+      helpers.dbg(3, 'filtered items (sku prefix)', items);
     }
 
-    helpers.dbg(1, 'found items...', items);
+    helpers.dbg(2, 'found items...', items);
 
     if (!items || items.length === 0) {
       helpers.out('(no items!)');
@@ -757,7 +757,7 @@ Examples:
       return col;
     });
 
-    console.log('COLUMNS', fields);
+    helpers.dbg(2, 'columns', fields);
     return fields;
   }
 }

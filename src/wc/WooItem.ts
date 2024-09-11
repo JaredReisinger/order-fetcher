@@ -50,7 +50,7 @@ export default class WooItem {
     dbg(3, 'metadata', wcItem.meta_data);
     this.meta = WooItem.convertMetadata(order.id, wcItem.meta_data);
 
-    dbg(1, 'WooItem', this);
+    dbg(2, 'WooItem', this);
   }
 
   static convertMetadata(
@@ -77,7 +77,7 @@ export default class WooItem {
 
       // v1 keys/labels have price info, but no longer seem to...
       if (hasPriceRE.test(key)) {
-        dbg(1, `key has price: ${key}`);
+        dbg(2, `key has price: ${key}`);
         key = key.replace(hasPriceRE, '');
       }
 
