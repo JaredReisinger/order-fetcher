@@ -65,7 +65,7 @@ export default class WooItem {
       let { key, value } = m;
 
       if (!key) {
-        dbg(0, `order ${orderId} has meta with no key: ${JSON.stringify(m)}`);
+        dbg(1, `order ${orderId} has meta with no key: ${JSON.stringify(m)}`);
         return memo;
       }
 

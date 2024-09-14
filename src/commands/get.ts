@@ -8,6 +8,7 @@ import chalkTemplate from 'chalk-template';
 import {
   Parser as Json2CsvParser,
   FieldInfo as Json2CsvFieldInfo,
+  FieldValueGetterInfo as Json2CsvFieldValueGetterInfo,
 } from '@json2csv/plainjs';
 import lodashGet from 'lodash.get';
 // import printable from 'printable-characters';
@@ -25,6 +26,7 @@ const writeFileAsync = util.promisify(fs.writeFile);
 
 const whitespaceRE = /\s/g;
 const excelDateTimeFmt = 'M/D/YYYY h:mm:ss A';
+const excelDateFmt = 'M/D/YYYY';
 
 // table defines configs as readonly, but we build them piece by piece
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
@@ -35,8 +37,16 @@ type DisplayableKey<T> = keyof {
   [P in keyof T as T[P] extends Displayable ? P : never]: T[P];
 };
 
-type AugmentedFieldInfo<T> = Omit<Json2CsvFieldInfo<T, unknown>, 'label'> & {
-  label: string; // always!
+// Should we just curry in WooItem?
+type FieldInfo = Omit<Json2CsvFieldInfo<WooItem, unknown>, 'label'> & {
+  label: string; //always!
+};
+
+type FieldValueGetter = FieldInfo['value'];
+
+type FieldValueGetterInfo = Json2CsvFieldValueGetterInfo<unknown>;
+
+type AugmentedFieldInfo = FieldInfo & {
   config?: table.ColumnUserConfig;
   meta: {
     firstValue?: Displayable;
@@ -45,6 +55,8 @@ type AugmentedFieldInfo<T> = Omit<Json2CsvFieldInfo<T, unknown>, 'label'> & {
     maximumWidth: number;
   };
 };
+
+// type FieldGetter = AugmentedFieldInfo['value'];
 
 interface Args {
   host?: string;
@@ -249,7 +261,7 @@ About Column Filtering:
 
   If the "--omit-..." options are too coarse, you can enable or disable individual columns using the "--include" and "--omit" options, or for complete control use the "--columns" option to specify *exactly* what columns you want displayed and in what order they will appear.  Using "--list-columns" will list all of the column names present in a given set of items.  Do note that Do note that unless you use "--columns" to specify an exact set, the following columns are *always* included: "order#", "date", "name", "email", "qty", and "total".
 
-  The "--columns" option also allows for columns/fields with commas in the name by backslash-escaping the comma, "as\\,such".  You can also provide column aliases if you need to rename the output column using the "alias=real_name" syntax.
+  The "--columns" option also allows for columns/fields with commas in the name by backslash-escaping the comma, "as\\,such".  You can also provide column aliases if you need to rename the output column using the "alias=real_name" syntax.  Additionally, you can prefix a column/field with "[date]" to attempt to parse unix timestamps and format the values as dates.
 
 Examples:
 
@@ -374,17 +386,17 @@ Examples:
     let fields: typeof allFields;
 
     if (argv.columns) {
-      fields = Get.createColumnFields(argv.columns, allFields);
+      fields = this.createColumnFields(argv.columns, allFields);
     } else {
       // Regardless of the "--omit-..." options, we *always* want to include the
       // quantity and total.
-      const isRequired = (f: AugmentedFieldInfo<WooItem>) =>
+      const isRequired = (f: AugmentedFieldInfo) =>
         ['order#', 'date', 'name', 'email', 'qty', 'total'].includes(f.label);
 
-      const isIncluded = (f: AugmentedFieldInfo<WooItem>) =>
+      const isIncluded = (f: AugmentedFieldInfo) =>
         argv.include?.includes(f.label);
 
-      const isOmitted = (f: AugmentedFieldInfo<WooItem>) =>
+      const isOmitted = (f: AugmentedFieldInfo) =>
         (argv.omitBlanks && f.meta.allBlank) ||
         (argv.omitIdentical && f.meta.allIdentical) ||
         (argv.omitPayment &&
@@ -392,7 +404,7 @@ Examples:
         argv.omit?.includes(f.label);
 
       fields = allFields.filter((f) => {
-        // helpers.dbg(0, 'field?', {
+        // helpers.dbg(1, 'field?', {
         //   label: f.label,
         //   reqd: isRequired(f),
         //   omit: isOmitted(f),
@@ -410,7 +422,7 @@ Examples:
     }
   }
 
-  generateCsv(items: WooItem[], fields: AugmentedFieldInfo<WooItem>[]) {
+  generateCsv(items: WooItem[], fields: AugmentedFieldInfo[]) {
     const parser = new Json2CsvParser({ fields, withBOM: true });
     const csv = parser.parse(items);
     // const csv = json2csv.parse(items, { fields, withBOM: true });
@@ -421,7 +433,7 @@ Examples:
     await writeFileAsync(filename, content);
   }
 
-  generatePretty(items: WooItem[], fields: AugmentedFieldInfo<WooItem>[]) {
+  generatePretty(items: WooItem[], fields: AugmentedFieldInfo[]) {
     // colorize the date field, for fun...
     fields.forEach((f) => {
       if (f.label === 'date') {
@@ -516,7 +528,7 @@ Examples:
     });
   }
 
-  getValue(item: WooItem, field: AugmentedFieldInfo<WooItem>) {
+  getValue(item: WooItem, field: FieldInfo) {
     return this.sanitizeString(
       typeof field.value === 'function'
         ? field.value(item, field) || ''
@@ -536,7 +548,7 @@ Examples:
       ['order#', 'order.id'],
       [
         'date',
-        (item: WooItem) => this.formatDate(item.order.date),
+        (item: WooItem) => this.formatDateTime(item.order.date),
         { wrapWord: true },
       ],
       ['status', 'order.status'],
@@ -572,19 +584,17 @@ Examples:
       ['note', 'order.note', { wrapWord: true }],
     ] as const;
 
-    const defaultFields = fieldLabelKeys.map<AugmentedFieldInfo<WooItem>>(
-      (lk) => ({
-        value: lk[1],
-        label: lk[0],
-        config: lk[2] || {},
-        meta: {
-          firstValue: undefined,
-          allBlank: true,
-          allIdentical: true,
-          maximumWidth: lk[0].length,
-        },
-      })
-    );
+    const defaultFields = fieldLabelKeys.map<AugmentedFieldInfo>((lk) => ({
+      value: lk[1],
+      label: lk[0],
+      config: lk[2] || {},
+      meta: {
+        firstValue: undefined,
+        allBlank: true,
+        allIdentical: true,
+        maximumWidth: lk[0].length,
+      },
+    }));
 
     helpers.dbg(4, 'default fields', defaultFields);
 
@@ -615,11 +625,11 @@ Examples:
     return allFields;
   }
 
-  collectMetaFields(items: WooItem[]): AugmentedFieldInfo<WooItem>[] {
+  collectMetaFields(items: WooItem[]): AugmentedFieldInfo[] {
     // For each key in the meta sub-object, create a field definition. Also be
     // aware that some meta fields can contain *lists*, in which case we create
     // a pseudo-field for each sub-item.
-    const metaFieldMap: Record<string, AugmentedFieldInfo<WooItem>> = {};
+    const metaFieldMap: Record<string, AugmentedFieldInfo> = {};
 
     items.forEach((i) => {
       Object.entries(i.meta).forEach(([key, val]) => {
@@ -681,26 +691,36 @@ Examples:
       });
     });
 
-    const metaFields = Object.values(metaFieldMap).sort((a, b) =>
-      helpers.stringCompare(a.label, b.label)
-    );
+    const metaFields = Object.values(metaFieldMap)
+      .sort((a, b) => helpers.stringCompare(a.label, b.label))
+      .map((meta) => {
+        if (meta.label.match(/date/i)) {
+          return {
+            ...meta,
+            value: this.createDateWrapper(meta),
+          };
+        }
+        return meta;
+      });
+
     helpers.dbg(3, 'metaFields', metaFields);
 
     return metaFields;
   }
 
-  formatDate(d: moment.MomentInput) {
+  formatDateTime(d: moment.MomentInput) {
     return moment(d).tz(this.timezone).format(excelDateTimeFmt);
+  }
+
+  formatDate(d: moment.MomentInput) {
+    return moment(d).tz(this.timezone).format(excelDateFmt);
   }
 
   formatAmount(amt: string, code: string, currencies: WooCurrencies) {
     return `${currencies.getSymbol(code)}${amt}`;
   }
 
-  static createColumnFields(
-    columns: string,
-    allFields: AugmentedFieldInfo<WooItem>[]
-  ) {
+  createColumnFields(columns: string, allFields: AugmentedFieldInfo[]) {
     // If columns is given, create *exactly* those fields... note that a
     // column/meta name *can* contain a comma; we use "\," for this.  We used
     // to have a simple map() to process, but we need a loop to handle
@@ -725,23 +745,49 @@ Examples:
     // occasional field, we don't want the output to change based on a
     // particular range *not* having the column!
     const fields = cols.map((c) => {
+      // Handle date-picker fields (should we ever assume/check?)
+      let convertDate = false;
+      if (c.match(/^\[date\]/)) {
+        convertDate = true;
+        const tmp = c;
+        c = c.substring(6);
+        helpers.dbg(2, 'found date option', { c, tmp });
+      }
+
       // We now support `alias=field_name` for a column, so we need to handle
       // parsing that.
       const alias = c.split('=', 2);
       const label = alias[0];
       const sourceLabel = alias[alias.length - 1];
-      let col = allFields.find(
-        (f) => f.label === sourceLabel || f.label === c
-      ) || {
-        label: alias[0],
-        value: () => '',
-        config: {},
-        meta: {
-          allBlank: true,
-          allIdentical: true,
-          maximumWidth: c.length,
-        },
-      };
+      let col = allFields.find((f) => f.label === sourceLabel || f.label === c);
+
+      helpers.dbg(1, 'found col', { col });
+      if (col) {
+        // check date?
+        if (convertDate || c.match(/date/i)) {
+          col = {
+            ...col,
+            meta: {
+              ...col.meta,
+              // maximumWidth: Math.max(col.meta.maximumWidth, 10),
+            },
+            value: this.createDateWrapper(col),
+          };
+        }
+      }
+
+      if (!col) {
+        col = {
+          label: alias[0],
+          value: () => '',
+          config: {},
+          meta: {
+            allBlank: true,
+            allIdentical: true,
+            maximumWidth: c.length,
+          },
+        };
+      }
 
       if (alias.length > 1) {
         col = {
@@ -759,6 +805,52 @@ Examples:
 
     helpers.dbg(2, 'columns', fields);
     return fields;
+  }
+
+  createDateWrapper(inner: AugmentedFieldInfo): FieldValueGetter {
+    return (row: WooItem, field: FieldValueGetterInfo): unknown => {
+      const innerValue = this.getValue(row, inner);
+      let innerNum = 0;
+      let tryConvert = false;
+
+      helpers.dbg(2, 'converting date?', { innerValue });
+
+      // Typescript can't track type through an intermediate variable, so we just
+      // call typeof several times.
+      if (typeof innerValue === 'number') {
+        innerNum = innerValue;
+        tryConvert = true;
+      } else if (typeof innerValue === 'string') {
+        if (innerValue.match(/-?[0-9]{1,13}/)) {
+          innerNum = Number.parseInt(innerValue, 10);
+          tryConvert = true;
+        }
+      }
+
+      if (tryConvert) {
+        if (innerNum > 999999999999 || innerNum < -999999999999) {
+          innerNum /= 1000;
+        }
+
+        const date = moment.unix(innerNum);
+        const dateFmt = this.formatDate(date);
+
+        helpers.dbg(2, 'converting date', {
+          label: field.label,
+          innerValue,
+          date,
+          dateFmt,
+        });
+
+        return dateFmt;
+      }
+
+      helpers.dbg(2, "doesn't look like date", {
+        label: field.label,
+        innerValue,
+      });
+      return innerValue;
+    };
   }
 }
 

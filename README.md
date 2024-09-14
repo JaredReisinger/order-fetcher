@@ -87,7 +87,7 @@ The various `--omit...` and `--include` options control whether columns are incl
 
 If the `--omit-...` options are too coarse, you can enable or disable individual columns using the `--include` and `--omit` options, or for complete control use the `--columns` option to specify _exactly_ what columns you want displayed and in what order they will appear. Using `--list-columns` will list all of the columns present in a given set of items. Do note that unless you use `--columns` to specify an exact set, the following columns are _always_ included: "order#", "date", "name", "email", "qty", and "total".
 
-The `--columns` option also allows for columns/fields with commas in the name by backslash-escaping the comma, `as\,such`. You can also provide column aliases if you need to rename the output column using the `alias=real_name` syntax.
+The `--columns` option also allows for columns/fields with commas in the name by backslash-escaping the comma, `as\,such`. You can also provide column aliases if you need to rename the output column using the `alias=real_name` syntax. Additionally, you can prefix a column/field with `[date]` to attempt to parse unix timestamps and format the values as dates.
 
 ### Examples
 

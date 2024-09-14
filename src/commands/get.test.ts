@@ -140,19 +140,12 @@ test('Get.createCommand("foo").builder supports after/before parsing', async (t)
   }
 });
 
-const meta = {
-  allBlank: false,
-  allIdentical: false,
-  maximumWidth: 100,
-};
-
 test('Get.getValue() should extract a field', (t) => {
   const get = createGet();
   t.is(
     get.getValue({ field: 'FIELD' } as unknown as WooItem, {
       value: 'field',
       label: '',
-      meta,
     }),
     'FIELD'
   );
@@ -164,7 +157,6 @@ test('Get.getValue() should handle nested fields', (t) => {
     get.getValue({ outer: { inner: 'FIELD' } } as unknown as WooItem, {
       value: 'outer.inner',
       label: '',
-      meta,
     }),
     'FIELD'
   );
@@ -180,7 +172,6 @@ test('Get.getValue() should handle extractor functions', (t) => {
         unknown
       >,
       label: '',
-      meta,
     }),
     'FN(FIELD)'
   );
@@ -229,11 +220,18 @@ test('Get.collectMetaFields() should return meta field descriptors', (t) => {
   ]);
 });
 
+test('Get.formatDateTime()should return an Excel-formatted date/time', (t) => {
+  const get = createGet();
+  // use go-lang's magic date: "01/02 03:04:05PM ‘06 -0700" (minus TZ)
+  const result = get.formatDateTime(new Date(Date.UTC(2006, 0, 2, 3, 4, 5)));
+  t.is(result, '1/2/2006 3:04:05 AM');
+});
+
 test('Get.formatDate()should return an Excel-formatted date', (t) => {
   const get = createGet();
   // use go-lang's magic date: "01/02 03:04:05PM ‘06 -0700" (minus TZ)
   const result = get.formatDate(new Date(Date.UTC(2006, 0, 2, 3, 4, 5)));
-  t.is(result, '1/2/2006 3:04:05 AM');
+  t.is(result, '1/2/2006');
 });
 
 test('Get.formatAmount() should return formatted amount', (t) => {
@@ -383,21 +381,30 @@ test('Get.run() can handle escaped-comma columns', async (t) => {
 });
 
 test('Get.createColumnFields() can handle list of columns', (t) => {
-  const actual = Get.createColumnFields('one,two,three', []);
+  const get = createGet();
+  const actual = get.createColumnFields('one,two,three', []);
   t.like(actual[0], { label: 'one' });
   t.like(actual[1], { label: 'two' });
   t.like(actual[2], { label: 'three' });
 });
 
 test('Get.createColumnFields() can handle escaped-comma columns', (t) => {
-  const actual = Get.createColumnFields('one\\,two,three', []);
+  const get = createGet();
+  const actual = get.createColumnFields('one\\,two,three', []);
   t.like(actual[0], { label: 'one,two' });
   t.like(actual[1], { label: 'three' });
 });
 
 test('Get.createColumnFields() can handle column alias', (t) => {
-  const actual = Get.createColumnFields('the_sku=sku', []);
+  const get = createGet();
+  const actual = get.createColumnFields('the_sku=sku', []);
   t.like(actual[0], { label: 'the_sku' });
+});
+
+test('Get.createColumnFields() can handle date-flagged field', (t) => {
+  const get = createGet();
+  const actual = get.createColumnFields('[date]name', []);
+  t.like(actual[0], { label: 'name' });
 });
 
 test('Get.run() can output CSV to a file', async (t) => {

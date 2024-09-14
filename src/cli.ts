@@ -83,7 +83,7 @@ async function loadConfig(): Promise<ConfigFile> {
     `.${pkgInfo?.packageJson.name}.json`
   );
   // can't really use dbg() since this is called *before* parsing options!
-  // dbg(0, 'checking for config', { filename });
+  // dbg(1, 'checking for config', { filename });
   try {
     const data = await readFileAsync(filename);
     const cfg = JSON.parse(data.toString()) as ConfigFile;
