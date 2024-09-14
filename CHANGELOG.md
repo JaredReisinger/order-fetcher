@@ -1,3 +1,10 @@
+## [5.2.3](https://github.com/JaredReisinger/order-fetcher/compare/v5.2.2...v5.2.3) (2024-09-14)
+
+
+### Bug Fixes
+
+* remove accidental logging 🤦 ([5f3f0dd](https://github.com/JaredReisinger/order-fetcher/commit/5f3f0dd03f1006502140c9de93c90b4ed5b5601b))
+
 ## [5.2.2](https://github.com/JaredReisinger/order-fetcher/compare/v5.2.1...v5.2.2) (2024-09-14)
 
 
