@@ -1,3 +1,10 @@
+## [5.2.1](https://github.com/JaredReisinger/order-fetcher/compare/v5.2.0...v5.2.1) (2024-09-14)
+
+
+### Bug Fixes
+
+* don't double-convert dates! ([ac7614b](https://github.com/JaredReisinger/order-fetcher/commit/ac7614b3170abe9368152fb30fdfc85bda2091fe))
+
 # [5.2.0](https://github.com/JaredReisinger/order-fetcher/compare/v5.1.1...v5.2.0) (2024-09-14)
 
 
