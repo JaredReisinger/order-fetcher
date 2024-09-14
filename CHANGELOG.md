@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/JaredReisinger/order-fetcher/compare/v5.1.1...v5.2.0) (2024-09-14)
+
+
+### Features
+
+* support date fields and `[date]` column flag ([e00d6d7](https://github.com/JaredReisinger/order-fetcher/commit/e00d6d73d69243a8eb06f12b11ddf343e5f53074))
+
 ## [5.1.1](https://github.com/JaredReisinger/order-fetcher/compare/v5.1.0...v5.1.1) (2024-09-11)
 
 
