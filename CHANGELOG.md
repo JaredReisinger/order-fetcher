@@ -1,3 +1,10 @@
+## [5.2.2](https://github.com/JaredReisinger/order-fetcher/compare/v5.2.1...v5.2.2) (2024-09-14)
+
+
+### Bug Fixes
+
+* update all dependencies ([32e30b0](https://github.com/JaredReisinger/order-fetcher/commit/32e30b0d71690d44677abf4d133a9467bc86f959))
+
 ## [5.2.1](https://github.com/JaredReisinger/order-fetcher/compare/v5.2.0...v5.2.1) (2024-09-14)
 
 
