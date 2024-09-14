@@ -813,7 +813,7 @@ Examples:
       let innerNum = 0;
       let tryConvert = false;
 
-      helpers.dbg(2, 'converting date?', { innerValue });
+      helpers.dbg(0, 'converting date?', { innerValue });
 
       // Typescript can't track type through an intermediate variable, so we just
       // call typeof several times.
@@ -821,7 +821,7 @@ Examples:
         innerNum = innerValue;
         tryConvert = true;
       } else if (typeof innerValue === 'string') {
-        if (innerValue.match(/-?[0-9]{1,13}/)) {
+        if (innerValue.match(/^-?[0-9]{1,13}$/)) {
           innerNum = Number.parseInt(innerValue, 10);
           tryConvert = true;
         }
@@ -835,7 +835,7 @@ Examples:
         const date = moment.unix(innerNum);
         const dateFmt = this.formatDate(date);
 
-        helpers.dbg(2, 'converting date', {
+        helpers.dbg(0, 'converting date', {
           label: field.label,
           innerValue,
           date,
@@ -845,7 +845,7 @@ Examples:
         return dateFmt;
       }
 
-      helpers.dbg(2, "doesn't look like date", {
+      helpers.dbg(0, "doesn't look like date", {
         label: field.label,
         innerValue,
       });
