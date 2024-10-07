@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@inquirer/core": "^9.1.0",
-    "@inquirer/prompts": "^5.5.0",
+    "@inquirer/prompts": "^6.0.1",
     "@json2csv/plainjs": "^7.0.6",
     "@snyk/protect": "^1.1293.1",
     "chalk": "^5.3.0",
